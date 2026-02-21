@@ -2,14 +2,7 @@ import { renderComponent } from '$lib/components/ui/data-table';
 import type { ColumnDef } from '@tanstack/table-core';
 import DataTableActions from '../../../lib/components/data-table/data-table-actions.svelte';
 import { Checkbox } from '$lib/components/ui/checkbox';
-
-export type User = {
-	id: string;
-	name: string;
-	role: ('Club Head' | 'Faculty Coordinator')[];
-	email: string;
-	status: 'active' | 'inactive';
-};
+import type { User } from '$lib/types';
 
 export const columns: ColumnDef<User>[] = [
 	{
