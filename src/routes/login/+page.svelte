@@ -1,14 +1,20 @@
-<script>
+<script lang="ts">
 	import Button from '$lib/components/ui/button/button.svelte';
 	import Input from '$lib/components/ui/input/input.svelte';
 	import Label from '$lib/components/ui/label/label.svelte';
+	import type { ActionData } from './$types';
+
+	let { form }: { form: ActionData } = $props();
 </script>
 
 <div class="flex h-full w-full flex-col md:w-lg md:border md:p-r-pad">
 	<div class="my-auto flex flex-col">
 		<h1 class="mb-xs text-primary">Login</h1>
 		<p>Log in to your account</p>
-		<form class=" mt-heavy flex flex-col gap-y-sm">
+		<form method="POST" action="?/login" class=" mt-heavy flex flex-col gap-y-sm">
+			{#if form?.error}
+				<p class="text-sm text-red-500">{form?.error}</p>
+			{/if}
 			<div class="flex flex-col gap-y-xxxs">
 				<Label for="email">Email</Label>
 				<Input type="email" name="email" placeholder="example@domain.com" />
