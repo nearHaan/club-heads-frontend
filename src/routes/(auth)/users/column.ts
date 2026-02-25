@@ -24,7 +24,7 @@ export const columns: ColumnDef<User>[] = [
 		enableHiding: false
 	},
 	{
-		accessorKey: 'name',
+		accessorKey: 'fullName',
 		header: 'Name'
 	},
 	{
@@ -37,13 +37,13 @@ export const columns: ColumnDef<User>[] = [
 		header: 'Email'
 	},
 	{
-		accessorKey: 'status',
+		accessorKey: 'isActive',
 		header: 'Status'
 	},
 	{
 		id: 'actions',
 		cell: ({ row }) => {
-			return renderComponent(DataTableActions, { id: row.original.id });
+			return renderComponent(DataTableActions, { row: row.original });
 		}
 	}
 ];
