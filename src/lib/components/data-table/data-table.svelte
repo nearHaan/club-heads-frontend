@@ -7,7 +7,7 @@
 	import {
 		type ColumnDef,
 		type ColumnFiltersState,
-		type PaginationState,
+		// type PaginationState,
 		type RowSelectionState,
 		type SortingState,
 		type VisibilityState,
@@ -17,7 +17,7 @@
 		getSortedRowModel
 	} from '@tanstack/table-core';
 	import Badge from '../ui/badge/badge.svelte';
-	import { type User } from '../../../routes/(auth)/users/column';
+	import type { User } from '$lib/types';
 
 	type DataTableProps<TData, TValue> = {
 		data: TData[];
@@ -26,7 +26,7 @@
 
 	let { columns, data }: DataTableProps<TData, TValue> = $props();
 
-	let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 10 });
+	// let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 10 });
 	let sorting = $state<SortingState>([]);
 	let columnFilters = $state<ColumnFiltersState>([]);
 	let columnVisibility = $state<VisibilityState>({});
@@ -41,13 +41,13 @@
 		getPaginationRowModel: getPaginationRowModel(),
 		getSortedRowModel: getSortedRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
-		onPaginationChange: (updater) => {
-			if (typeof updater === 'function') {
-				pagination = updater(pagination);
-			} else {
-				pagination = updater;
-			}
-		},
+		// onPaginationChange: (updater) => {
+		// 	if (typeof updater === 'function') {
+		// 		pagination = updater(pagination);
+		// 	} else {
+		// 		pagination = updater;
+		// 	}
+		// },
 		onSortingChange: (updater) => {
 			if (typeof updater === 'function') {
 				sorting = updater(sorting);
@@ -77,9 +77,9 @@
 			}
 		},
 		state: {
-			get pagination() {
-				return pagination;
-			},
+			// get pagination() {
+			// 	return pagination;
+			// },
 			get sorting() {
 				return sorting;
 			},

@@ -2,8 +2,10 @@
 	import EllipsisIcon from '@lucide/svelte/icons/ellipsis';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
+	import type { User } from '$lib/types';
+	import { roleState } from '$lib/stores/roleAssign.svelte';
 
-	let { id }: { id: string } = $props();
+	let { row }: { row: User } = $props();
 </script>
 
 <DropdownMenu.Root>
@@ -18,12 +20,16 @@
 	<DropdownMenu.Content>
 		<DropdownMenu.Group>
 			<DropdownMenu.Label>Actions</DropdownMenu.Label>
-			<DropdownMenu.Item onclick={() => navigator.clipboard.writeText(id)}>
-				Copy payment ID
+			<DropdownMenu.Item onclick={() => navigator.clipboard.writeText(row.email)}>
+				Copy Email
 			</DropdownMenu.Item>
 		</DropdownMenu.Group>
 		<DropdownMenu.Separator />
-		<DropdownMenu.Item>View customer</DropdownMenu.Item>
-		<DropdownMenu.Item>View payment details</DropdownMenu.Item>
+		<DropdownMenu.Item
+			onclick={() => {
+				roleState.assignSheetOpen = true;
+				roleState.selectedUser = row;
+			}}>Assign Roles</DropdownMenu.Item
+		>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>

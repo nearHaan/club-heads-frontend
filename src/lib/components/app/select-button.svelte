@@ -24,7 +24,6 @@
 	</Select.Trigger>
 	<Select.Content>
 		<Select.Group>
-			<Select.Label>{label}</Select.Label>
 			{#each items as v (v.value)}
 				<Select.Item value={v.value} label={v.label}>
 					{v.label}
