@@ -65,3 +65,13 @@ type LoadingFailure = {
 	state: 'failed';
 	message: string;
 };
+
+export type Venue = {
+	organization_id: string;
+	venue_name: string;
+	venue_type_id: string;
+	access_level: 'public' | 'private';
+	is_available: boolean;
+	unavailability_reason: string;
+	max_capacity: number;
+};

@@ -15,6 +15,10 @@
 			title: 'Organizations',
 			url: '/organizations',
 			icon: CirclePileIcon
+		},{
+			title: 'Venues',
+			url: '/venues',
+			icon: CirclePileIcon
 		}
 	];
 
