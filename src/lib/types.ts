@@ -38,6 +38,15 @@ export type AssignRole = {
 	organizationId: string | null;
 };
 
+export type OrganizationType = {
+	id: string;
+	name: string;
+	children: {
+		childTypeId: string;
+	}[];
+	selectedId: string;
+};
+
 export type ApiSuccess<T> = {
 	data: T;
 };
