@@ -1,7 +1,7 @@
 import { PUBLIC_API_BASE_URL } from '$env/static/public';
 import ky from 'ky';
 
-const UNPROTECTED_ROUTES = ['auth/login', 'auth/refresh'].map((route) => `/api/${route}`);
+const UNPROTECTED_ROUTES = ['auth/login', 'auth/refresh'];
 
 export const api = ky.create({
 	prefixUrl: PUBLIC_API_BASE_URL,

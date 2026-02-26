@@ -24,7 +24,10 @@
 			success: (newType) => {
 				console.log('Added new type');
 				if (orgTypes.state === 'success') {
-					orgTypes.data = [...orgTypes.data, newType.data];
+					orgTypes.data = [
+						...orgTypes.data,
+						{ id: newType.id, name: newType.name, children: [], selectedId: '' } //TODO: change selectedId type form string to ??(null)
+					];
 				}
 				return 'Organization Type Saved';
 			},
