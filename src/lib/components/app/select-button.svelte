@@ -24,11 +24,15 @@
 	</Select.Trigger>
 	<Select.Content>
 		<Select.Group>
-			{#each items as v (v.value)}
-				<Select.Item value={v.value} label={v.label}>
-					{v.label}
-				</Select.Item>
-			{/each}
+			{#if items.length > 0}
+				{#each items as v (v.value)}
+					<Select.Item value={v.value} label={v.label}>
+						{v.label}
+					</Select.Item>
+				{/each}
+			{:else}
+				<p class="p-xxs text-xs italic">No items</p>
+			{/if}
 		</Select.Group>
 	</Select.Content>
 </Select.Root>
