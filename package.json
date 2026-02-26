@@ -37,6 +37,7 @@
 	},
 	"dependencies": {
 		"clsx": "^2.1.1",
+		"ky": "^1.14.3",
 		"tailwind-merge": "^3.5.0"
 	}
 }

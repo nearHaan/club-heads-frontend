@@ -1,38 +1,31 @@
 import { PUBLIC_API_BASE_URL } from '$env/static/public';
-import type { Organization, OrganizationType, User } from '$lib/types';
+import { api } from '$lib/api';
+import type { ApiResponse, Organization, OrganizationType, User } from '$lib/types';
 
 export async function loadOrgs() {
-	const res = await fetch(`${PUBLIC_API_BASE_URL}/admin/organizations`, {
-		method: 'GET',
-		headers: {
-			'Content-Type': 'application/json'
-		}
-	});
-
-	if (!res.ok) {
-		return [] as Array<Organization>;
+	const res = await api.get('admin/organizations').json<
+		ApiResponse<{
+			organizations: Organization[];
+		}>
+	>();
+	if (res.success) {
+		return res.data.organizations;
+	} else {
+		throw new Error(res.message);
 	}
-
-	const orgs: Organization[] = (await res.json()).data.organizations ?? [];
-
-	return orgs;
 }
 
 export async function loadOrgTypes() {
-	const res = await fetch(`${PUBLIC_API_BASE_URL}/organization-types`, {
-		method: 'GET',
-		headers: {
-			'Content-Type': 'application/json'
-		}
-	});
-
-	if (!res.ok) {
-		return [] as Array<OrganizationType>;
+	const res = await api.get('organization-types').json<
+		ApiResponse<{
+			organizationTypes: OrganizationType[];
+		}>
+	>();
+	if (res.success) {
+		return res.data.organizationTypes;
+	} else {
+		throw new Error(res.message);
 	}
-
-	const orgs: OrganizationType[] = (await res.json()).data.organizationTypes ?? [];
-
-	return orgs;
 }
 
 export async function createOrg(name: string, type: Organization['type'], parent: string) {
@@ -40,70 +33,57 @@ export async function createOrg(name: string, type: Organization['type'], parent
 		throw new Error('Name and Type are required fields');
 	}
 
-	const res = await fetch(`${PUBLIC_API_BASE_URL}/admin/organizations`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify({
-			name,
-			type,
-			parentOrganizationId: parseInt(parent) //TODO: discuss uuid
-		})
-	});
-
-	if (!res.ok) {
-		const error = await res.json().catch(() => ({}));
-		throw new Error(error.message);
+	const res = await api
+		.post('admin/organizations', { json: { name, type, parentOrganizationId: parseInt(parent) } })
+		.json<
+			ApiResponse<{
+				id: string;
+				name: string;
+				organizationTypeId: string;
+				parentOrganizationId: string;
+			}>
+		>();
+	if (res.success) {
+		return res.data;
+	} else {
+		throw new Error(res.message);
 	}
-
-	return true;
 }
 
 export async function addOrgType(name: string) {
 	if (!name) {
 		throw new Error('Name is required');
 	}
-
-	const res = await fetch(`${PUBLIC_API_BASE_URL}/organization-types`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify({
-			name
-		})
-	});
-
-	if (!res.ok) {
-		console.error(await res.json());
-		const error = await res.json().catch(() => ({}));
-		throw new Error(error.message);
+	const res = await api.post('organization-types', { json: { name } }).json<
+		ApiResponse<{
+			id: string;
+			name: string;
+		}>
+	>();
+	if (res.success) {
+		return res.data;
+	} else {
+		throw new Error(res.message);
 	}
-
-	return await res.json();
 }
 
 export async function addChildOrgType(id: string, childId: string) {
 	if (!id || !childId) {
 		throw new Error('Parent ID and Child ID are required');
 	}
-
-	const res = await fetch(
-		`${PUBLIC_API_BASE_URL}/organization-types/${id}/allow-children/${childId}`,
-		{
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			}
-		}
-	);
-
-	if (!res.ok) {
-		console.error(await res.json());
-		const error = await res.json().catch(() => ({}));
-		throw new Error(error.message);
+	const res = await api
+		.post(`organization-types/${id}/allow-children/${childId}`, { json: { name } })
+		.json<
+			ApiResponse<{
+				allowedParent: {
+					parentTypeId: string;
+					childTypeId: string;
+				};
+			}>
+		>();
+	if (res.success) {
+		return res.data;
+	} else {
+		throw new Error(res.message);
 	}
-
-	return await res.json();
 }
