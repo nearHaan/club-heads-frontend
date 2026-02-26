@@ -47,16 +47,27 @@ export type OrganizationType = {
 	selectedId: string;
 };
 
+export type AuthUser = {
+	user: {
+		id: string;
+		fullName: string;
+		email: string;
+	} | null;
+	permissions: string[]; //TODO: change data type
+};
+
 export type ApiSuccess<T> = {
+	success: true;
 	data: T;
 };
 
 export type ApiFailure = {
+	success: false;
 	code: number;
 	message: string;
 };
 
-export type ApiResponse<T> = ApiSuccess<T> | ApiFailure;
+export type ApiResponse<T = unknown> = ApiSuccess<T> | ApiFailure;
 
 export type LoadedData<T> = LoadingPending | LoadingSuccess<T> | LoadingFailure;
 

@@ -74,7 +74,6 @@
 				state: 'success',
 				data: await loadOrgTypes()
 			};
-			console.log(orgTypes.data);
 		} catch (error) {
 			orgTypes = {
 				state: 'failed',

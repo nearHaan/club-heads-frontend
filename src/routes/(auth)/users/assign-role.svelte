@@ -9,7 +9,7 @@
 	import Label from '$lib/components/ui/label/label.svelte';
 	import Separator from '$lib/components/ui/separator/separator.svelte';
 	import * as Sheet from '$lib/components/ui/sheet/index.js';
-	import { roleState } from '$lib/stores/roleAssign.svelte';
+	import { roleState } from '$lib/global/roleAssign.svelte';
 	import type { AssignRole, Organization, Role, User } from '$lib/types';
 	import {
 		ArrowDownIcon,
