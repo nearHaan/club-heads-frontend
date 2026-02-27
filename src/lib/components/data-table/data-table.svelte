@@ -148,7 +148,8 @@
 							<Table.Cell>
 								{#if cell.column.columnDef.id === 'role'}
 									<div class="flex gap-x-xxxs">
-										{#each (cell.getValue() as User['role']) ?? [] as role}
+										<!-- TODO: Fix cell.getValue() type -->
+										{#each (cell.getValue() as string) ?? [] as role}
 											<Badge variant="outline">{role}</Badge>
 										{/each}
 									</div>

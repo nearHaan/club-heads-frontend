@@ -71,7 +71,6 @@
 				state: 'success',
 				data: await loadUsers()
 			};
-			console.log(users.data);
 		} catch (error) {
 			users = {
 				state: 'failed',

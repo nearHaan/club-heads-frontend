@@ -3,7 +3,7 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import type { User } from '$lib/types';
-	import { roleState } from '$lib/stores/roleAssign.svelte';
+	import { roleState } from '$lib/global/roleAssign.svelte';
 
 	let { row }: { row: User } = $props();
 </script>
