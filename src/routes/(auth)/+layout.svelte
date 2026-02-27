@@ -1,19 +1,8 @@
 <script lang="ts">
-	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import AppSidebar from '$lib/components/app-sidebar.svelte';
-	import { MenuIcon } from '@lucide/svelte';
-	import { onMount } from 'svelte';
-	import { authUser } from '$lib/api/auth';
+	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 
 	let { children } = $props();
-
-	onMount(async () => {
-		try {
-			await authUser();
-		} catch (err: any) {
-			console.error(err.message);
-		}
-	});
 </script>
 
 <Sidebar.Provider class="w-screen">
