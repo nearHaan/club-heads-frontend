@@ -8,12 +8,13 @@ type OrganizationRole = {
 export type User = {
 	id: string;
 	fullName: string;
-	role: ('Club Head' | 'Faculty Coordinator')[];
 	email: string;
+	type: 'admin' | 'end_user';
 	isActive: boolean;
 	organizationRoles: OrganizationRole[];
 };
 
+// TODO: Match types
 export type Organization = {
 	id: string;
 	name: string;
@@ -61,9 +62,20 @@ export type ApiSuccess<T> = {
 	data: T;
 };
 
+export enum ERROR_CODES {
+	// todo: sort
+	validation_error = 'VALIDATION_ERROR',
+	user_not_found = 'USER_NOT_FOUND',
+	unauthorized = 'UNAUTHORIZED',
+	already_exists = 'ALREADY_EXISTS',
+	internal_server_error = 'INTERNAL_SERVER_ERROR',
+	invalid_related_entity = 'INVALID_RELATED_ENTITY', // todo: what? make this better
+	forbidden = 'FORBIDDEN'
+}
+
 export type ApiFailure = {
 	success: false;
-	code: number;
+	code: ERROR_CODES;
 	message: string;
 };
 
