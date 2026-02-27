@@ -3,7 +3,7 @@ import { api } from '$lib/api';
 import type { ApiResponse, User } from '$lib/types';
 
 export async function loadUsers() {
-	const res = await api.get('/admin/users').json<
+	const res = await api.get('admin/users').json<
 		ApiResponse<{
 			users: User[];
 		}>
@@ -21,7 +21,7 @@ export async function createUser(name: string, email: string, status: string) {
 	}
 
 	const res = await api
-		.post('/admin/users', {
+		.post('admin/users', {
 			json: {
 				fullName: name,
 				email,
