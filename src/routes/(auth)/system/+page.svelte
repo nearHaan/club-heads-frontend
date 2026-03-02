@@ -7,6 +7,7 @@
 	import Label from '$lib/components/ui/label/label.svelte';
 	import Separator from '$lib/components/ui/separator/separator.svelte';
 	import type { LoadedData, OrganizationType } from '$lib/types';
+	import { TrashIcon } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
@@ -124,9 +125,12 @@
 					<Separator />
 					<div>
 						{#each org.children as child}
-							<p class="borer-b border p-xs">
-								{orgTypes.data.find((item) => item.id === child.childTypeId)?.name}
-							</p>
+							<div class="borer-b flex items-center border p-xs">
+								<p class="flex-1">
+									{orgTypes.data.find((item) => item.id === child.childTypeId)?.name}
+								</p>
+								<Button variant="link" class=" text-red-400"><TrashIcon /></Button>
+							</div>
 						{/each}
 						<div class="flex">
 							<SelectButton
@@ -151,4 +155,6 @@
 			<p>Failed to Load: {orgTypes.message}</p>
 		{/if}
 	</div>
+	<Separator />
+	<div class="flex grid-cols-2 flex-col gap-xs lg:grid"></div>
 </div>
