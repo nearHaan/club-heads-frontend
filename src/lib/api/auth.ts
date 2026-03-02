@@ -17,7 +17,7 @@ export async function authUser() {
 		} else {
 			// we are in some other page, so we shall clear the cookie and get to login page.
 			await logout(); // clear cookie and localstorage
-			goto('/login');
+			await goto('/login');
 			return;
 		}
 	} else {
@@ -26,7 +26,7 @@ export async function authUser() {
 			// we are in the login page,
 			// then we should try to go to the home page. if still unauthenticated,
 			// we will be taken back to the login page again, after clearing the localstorage.
-			goto('/');
+			await goto('/');
 			return;
 		} else {
 			// we are in some other page than login. we should try to authenticate
@@ -37,30 +37,30 @@ export async function authUser() {
 				// authentication success, the page is accessible.
 				authInfo.user = res.data.user;
 				authInfo.permissions = res.data.permissions;
-				// goto('/');
+				// await goto('/');
 				return;
 			} else {
-				// that didn't work. why?
-				if (res.code === ERROR_CODES.unauthorized) {
-					// access token seems to be expired; we should try the refresh token hoping that one exists
-					const refreshRes = await api
-						.post('auth/refresh', { credentials: 'include' })
-						.json<ApiResponse<AuthUser & { accessToken: string }>>();
-					if (refreshRes.success) {
-						localStorage.setItem('accessToken', refreshRes.data.accessToken);
-						authInfo.user = refreshRes.data.user;
-						authInfo.permissions = refreshRes.data.permissions;
-						return;
-					} else {
-						// refresh token doesnt work either. so clear everything, go back to login page.
-						await logout();
-						goto('/login');
-						return;
-					}
-				} else {
-					// it is some other error code we dont know how to handle yet. SO, global!
-					throw new Error(res.message);
-				}
+				// // that didn't work. why?
+				// if (res.code === ERROR_CODES.unauthorized) {
+				// 	// access token seems to be expired; we should try the refresh token hoping that one exists
+				// 	const refreshRes = await api
+				// 		.post('auth/refresh', { credentials: 'include' })
+				// 		.json<ApiResponse<AuthUser & { accessToken: string }>>();
+				// 	if (refreshRes.success) {
+				// 		localStorage.setItem('accessToken', refreshRes.data.accessToken);
+				// 		authInfo.user = refreshRes.data.user;
+				// 		authInfo.permissions = refreshRes.data.permissions;
+				// 		return;
+				// 	} else {
+				// 		// refresh token doesnt work either. so clear everything, go back to login page.
+				// 		await logout();
+				// 		goto('/login');
+				// 		return;
+				// 	}
+				// } else {
+				// 	// it is some other error code we dont know how to handle yet. SO, global!
+				// 	throw new Error(res.message);
+				// }
 			}
 		}
 	}
