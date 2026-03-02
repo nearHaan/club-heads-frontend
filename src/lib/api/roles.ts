@@ -3,7 +3,7 @@ import { api } from '$lib/api';
 import type { ApiResponse, Role } from '$lib/types';
 
 export async function loadRoles() {
-	const res = await api.get('admin/roles').json<
+	const res = await api.get('roles').json<
 		ApiResponse<{
 			roles: Role[];
 		}>

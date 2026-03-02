@@ -3,7 +3,7 @@ import { api } from '$lib/api';
 import type { ApiResponse, Organization, OrganizationType, User } from '$lib/types';
 
 export async function loadOrgs() {
-	const res = await api.get('admin/organizations').json<
+	const res = await api.get('organizations').json<
 		ApiResponse<{
 			organizations: Organization[];
 		}>
@@ -34,7 +34,7 @@ export async function createOrg(name: string, type: Organization['type'], parent
 	}
 
 	const res = await api
-		.post('admin/organizations', { json: { name, type, parentOrganizationId: parseInt(parent) } })
+		.post('organizations', { json: { name, type, parentOrganizationId: parseInt(parent) } })
 		.json<
 			ApiResponse<{
 				id: string;
