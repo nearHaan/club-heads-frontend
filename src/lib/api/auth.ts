@@ -41,26 +41,26 @@ export async function authUser() {
 				return;
 			} else {
 				// // that didn't work. why?
-				// if (res.code === ERROR_CODES.unauthorized) {
-				// 	// access token seems to be expired; we should try the refresh token hoping that one exists
-				// 	const refreshRes = await api
-				// 		.post('auth/refresh', { credentials: 'include' })
-				// 		.json<ApiResponse<AuthUser & { accessToken: string }>>();
-				// 	if (refreshRes.success) {
-				// 		localStorage.setItem('accessToken', refreshRes.data.accessToken);
-				// 		authInfo.user = refreshRes.data.user;
-				// 		authInfo.permissions = refreshRes.data.permissions;
-				// 		return;
-				// 	} else {
-				// 		// refresh token doesnt work either. so clear everything, go back to login page.
-				// 		await logout();
-				// 		goto('/login');
-				// 		return;
-				// 	}
-				// } else {
-				// 	// it is some other error code we dont know how to handle yet. SO, global!
-				// 	throw new Error(res.message);
-				// }
+				if (res.code === ERROR_CODES.unauthorized) {
+					// 	// access token seems to be expired; we should try the refresh token hoping that one exists
+					// 	const refreshRes = await api
+					// 		.post('auth/refresh', { credentials: 'include' })
+					// 		.json<ApiResponse<AuthUser & { accessToken: string }>>();
+					// 	if (refreshRes.success) {
+					// 		localStorage.setItem('accessToken', refreshRes.data.accessToken);
+					// 		authInfo.user = refreshRes.data.user;
+					// 		authInfo.permissions = refreshRes.data.permissions;
+					// 		return;
+					// 	} else {
+					// 		// refresh token doesnt work either. so clear everything, go back to login page.
+					await logout();
+					await goto('/login');
+					return;
+					// 	}
+				} else {
+					// it is some other error code we dont know how to handle yet. SO, global!
+					throw new Error(res.message);
+				}
 			}
 		}
 	}
