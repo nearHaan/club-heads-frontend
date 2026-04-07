@@ -1,11 +1,9 @@
 import { renderComponent } from '$lib/components/ui/data-table';
 import type { ColumnDef } from '@tanstack/table-core';
 import { Checkbox } from '$lib/components/ui/checkbox';
-import type { Organization } from '$lib/types';
-import { Button } from '$lib/components/ui/button';
-import { createRawSnippet } from 'svelte';
+import type { User } from '$lib/types';
 
-export const columns: ColumnDef<Organization>[] = [
+export const columns: ColumnDef<User>[] = [
 	{
 		id: 'select',
 		header: ({ table }) =>
@@ -25,20 +23,20 @@ export const columns: ColumnDef<Organization>[] = [
 		enableHiding: false
 	},
 	{
-		accessorKey: 'name',
+		accessorKey: 'fullName',
 		header: 'Name'
 	},
 	{
-		id: 'type',
-		accessorKey: 'type',
-		header: 'Type'
+		id: 'role',
+		accessorKey: 'role',
+		header: 'Role(s)'
 	},
 	{
-		accessorKey: 'parentOrganization',
-		header: 'Parent Organization'
+		accessorKey: 'email',
+		header: 'Email'
 	},
 	{
-		accessorKey: 'status',
+		accessorKey: 'isActive',
 		header: 'Status'
 	}
 ];

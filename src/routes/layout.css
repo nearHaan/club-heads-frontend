@@ -134,3 +134,9 @@
 		@apply text-4xl;
 	}
 }
+
+@layer utilities {
+	.primary-input {
+		@apply rounded-none border border-muted-foreground;
+	}
+}

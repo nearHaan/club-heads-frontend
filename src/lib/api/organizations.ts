@@ -3,46 +3,37 @@ import { api } from '$lib/api';
 import type { ApiResponse, Organization, OrganizationType, User } from '$lib/types';
 
 export async function loadOrgs() {
-	const res = await api.get('organizations').json<
-		ApiResponse<{
-			organizations: Organization[];
-		}>
-	>();
+	const res = await api.get('organizations').json<ApiResponse<Organization[]>>();
 	if (res.success) {
-		return res.data.organizations;
+		return res.data;
 	} else {
 		throw new Error(res.message);
 	}
 }
 
 export async function loadOrgTypes() {
-	const res = await api.get('organization-types').json<
-		ApiResponse<{
-			organizationTypes: OrganizationType[];
-		}>
-	>();
+	const res = await api.get('organization-types').json<ApiResponse<OrganizationType[]>>();
 	if (res.success) {
-		return res.data.organizationTypes;
+		return res.data;
 	} else {
 		throw new Error(res.message);
 	}
 }
 
-export async function createOrg(name: string, type: Organization['type'], parent: string) {
-	if (!name || !type) {
-		throw new Error('Name and Type are required fields');
+export async function createOrg(
+	name: string,
+	organizationTypeId: string,
+	parentOrganizationId: string
+) {
+	if (!name || !organizationTypeId) {
+		throw new Error('Name and Type ID are required fields');
 	}
 
 	const res = await api
-		.post('organizations', { json: { name, type, parentOrganizationId: parseInt(parent) } })
-		.json<
-			ApiResponse<{
-				id: string;
-				name: string;
-				organizationTypeId: string;
-				parentOrganizationId: string;
-			}>
-		>();
+		.post('organizations', {
+			json: { name, organizationTypeId, parentOrganizationId }
+		})
+		.json<ApiResponse<{ id: string }>>();
 	if (res.success) {
 		return res.data;
 	} else {
@@ -72,15 +63,67 @@ export async function addChildOrgType(id: string, childId: string) {
 		throw new Error('Parent ID and Child ID are required');
 	}
 	const res = await api
-		.post(`organization-types/${id}/allow-children/${childId}`, { json: { name } })
+		.post(`organization-types/${id}/children/${childId}`, { json: { name } })
 		.json<
 			ApiResponse<{
-				allowedParent: {
-					parentTypeId: string;
-					childTypeId: string;
-				};
+				parentTypeId: string;
+				childTypeId: string;
 			}>
 		>();
+	if (res.success) {
+		return res.data;
+	} else {
+		throw new Error(res.message);
+	}
+}
+
+export async function loadChildrenOrgType(id: string) {
+	if (!id) {
+		throw new Error('Parent ID is required');
+	}
+	const res = await api.get(`organization-types/${id}/children`).json<
+		ApiResponse<
+			{
+				id: string;
+				name: string;
+			}[]
+		>
+	>();
+	if (res.success) {
+		return res.data;
+	} else {
+		throw new Error(res.message);
+	}
+}
+
+export async function loadRolesOrgType(id: string) {
+	if (!id) {
+		throw new Error('Parent ID is required');
+	}
+	const res = await api.get(`organization-types/${id}/roles`).json<
+		ApiResponse<
+			{
+				id: string;
+				name: string;
+			}[]
+		>
+	>();
+	if (res.success) {
+		return res.data;
+	} else {
+		throw new Error(res.message);
+	}
+}
+
+export async function addRole(parentId: string, name: string) {
+	if (!parentId || !name) {
+		throw new Error('Parent ID and Name are required');
+	}
+	const res = await api.post(`organization-types/${parentId}/roles`, { json: { name } }).json<
+		ApiResponse<{
+			id: string;
+		}>
+	>();
 	if (res.success) {
 		return res.data;
 	} else {

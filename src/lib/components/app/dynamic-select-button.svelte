@@ -54,7 +54,7 @@
 <Select.Root type="single" {name} bind:value>
 	<Select.Trigger
 		onclick={reloadItems}
-		class={`${size === 'full' ? 'w-full' : ''} ${isBg ? 'bg-background' : ''}`}
+		class={`${size === 'full' ? 'w-full' : ''} ${isBg ? 'bg-background' : ''} rounded-xs`}
 	>
 		{ddTriggerContent}
 	</Select.Trigger>

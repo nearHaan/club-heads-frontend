@@ -18,12 +18,8 @@ export type User = {
 export type Organization = {
 	id: string;
 	name: string;
-	type: 'department' | 'club' | 'Institution';
-	parentOrganization?: {
-		id: string;
-		name: string;
-		type: 'department' | 'club' | 'institution';
-	};
+	organizationTypeId: string;
+	parentOrganizationId: string | null;
 	isActive: boolean;
 };
 
@@ -45,7 +41,40 @@ export type OrganizationType = {
 	children: {
 		childTypeId: string;
 	}[];
-	selectedId: string;
+	selectedChildId: string;
+	selectedRoleId: string;
+};
+
+export type ChildType = {
+	id: string;
+	name: string;
+};
+
+export type RoleType = {
+	id: string;
+	name: string;
+};
+
+type PermissionCode =
+	| 'user:create'
+	| 'user:modify'
+	| 'user:delete'
+	| 'organization:create'
+	| 'organization:modify'
+	| 'organization:delete'
+	| 'organization:assign_users';
+
+export type PermissionType = {
+	id: string;
+	code: PermissionCode;
+	description: string;
+};
+
+export type PermissionChildType = {
+	id: string;
+	title: string;
+	description: string;
+	status: boolean;
 };
 
 export type AuthUser = {

@@ -1,93 +1,24 @@
 <script lang="ts">
-	import { addChildOrgType, addOrgType, loadOrgTypes } from '$lib/api/organizations';
-	import DynamicSelectButton from '$lib/components/app/dynamic-select-button.svelte';
-	import SelectButton from '$lib/components/app/select-button.svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import Input from '$lib/components/ui/input/input.svelte';
-	import Label from '$lib/components/ui/label/label.svelte';
 	import Separator from '$lib/components/ui/separator/separator.svelte';
-	import type { LoadedData, OrganizationType } from '$lib/types';
-	import { TrashIcon } from '@lucide/svelte';
-	import { onMount } from 'svelte';
-	import { toast } from 'svelte-sonner';
-
-	let orgTypes = $state<LoadedData<OrganizationType[]>>({
-		state: 'pending',
-		message: 'Loading Organizations'
-	});
-	let newOrgTypeValue: string = $state('');
-
-	async function onSave() {
-		if (!newOrgTypeValue) return;
-		const promise = addOrgType(newOrgTypeValue);
-		toast.promise(promise, {
-			loading: 'Saving new organization type...',
-			success: (newType) => {
-				console.log('Added new type');
-				if (orgTypes.state === 'success') {
-					orgTypes.data = [
-						...orgTypes.data,
-						{ id: newType.id, name: newType.name, children: [], selectedId: '' } //TODO: change selectedId type form string to ??(null)
-					];
-				}
-				return 'Organization Type Saved';
-			},
-			error: (err) => {
-				console.error(err);
-				return 'Failed to save type';
-			},
-			finally: () => {
-				newOrgTypeValue = '';
-			}
-		});
-	}
-
-	async function onChildAdd(parentId: string, childId: string) {
-		if (!parentId || !childId) return;
-		const promise = addChildOrgType(parentId, childId);
-		toast.promise(promise, {
-			loading: 'Adding Child type...',
-			success: (res) => {
-				console.log('Added child');
-				if (orgTypes.state === 'success') {
-					orgTypes.data = orgTypes.data.map((orgType) =>
-						orgType.id === parentId
-							? {
-									...orgType,
-									selectedId: '',
-									children: [...orgType.children, { childTypeId: childId }]
-								}
-							: orgType
-					);
-				}
-				return 'Saved successfully';
-			},
-			error: (err) => {
-				console.error(err);
-				return 'Failed add type';
-			},
-			finally: () => {
-				newOrgTypeValue = '';
-			}
-		});
-	}
-
-	onMount(async () => {
-		try {
-			orgTypes = {
-				state: 'success',
-				data: await loadOrgTypes()
-			};
-		} catch (error) {
-			orgTypes = {
-				state: 'failed',
-				message: 'Failed to load users'
-			};
-		}
-	});
+	import { ChevronLeftIcon } from '@lucide/svelte';
+	import OrganizationTypesSection from './organization-types-section.svelte';
 </script>
 
-<div class="flex flex-col gap-y-sm p-r-pad">
+<div class="relative flex">
+	<div class="flex w-full lg:pl-30">
+		<OrganizationTypesSection />
+	</div>
+	<div class="sticky top-0 right-0 flex w-50 max-sm:hidden">
+		<Separator class="my-r-pad" orientation="vertical" />
+		<div class="my-r-pad flex flex-col items-start">
+			<Button variant="link"><ChevronLeftIcon /> Organizations</Button>
+			<Button variant="link"><ChevronLeftIcon /> Venues</Button>
+		</div>
+	</div>
+</div>
+
+<!-- <div class="flex flex-col gap-y-sm p-r-pad">
 	<div class="flex flex-col gap-y-xs">
 		<p class="text-sm font-bold">Organization Type</p>
 		<Label for="orgName">Name</Label>
@@ -157,4 +88,4 @@
 	</div>
 	<Separator />
 	<div class="flex grid-cols-2 flex-col gap-xs lg:grid"></div>
-</div>
+</div> -->

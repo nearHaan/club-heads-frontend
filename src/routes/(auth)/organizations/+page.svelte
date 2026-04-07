@@ -11,10 +11,10 @@
 	import Checkbox from '$lib/components/ui/checkbox/checkbox.svelte';
 	import ScrollArea from '$lib/components/ui/scroll-area/scroll-area.svelte';
 	import SelectButton from '$lib/components/app/select-button.svelte';
-	import type { LoadedData, Organization } from '$lib/types';
+	import type { LoadedData, Organization, OrganizationType } from '$lib/types';
 	import { createUser } from '$lib/api/users.js';
 	import { onMount } from 'svelte';
-	import { createOrg, loadOrgs } from '$lib/api/organizations';
+	import { createOrg, loadOrgs, loadOrgTypes } from '$lib/api/organizations';
 	import DynamicSelectButton from '$lib/components/app/dynamic-select-button.svelte';
 
 	const typeFilters = [
@@ -22,11 +22,10 @@
 		{ value: 'Department', label: 'Department' },
 		{ value: 'Club', label: 'Club' }
 	];
-	const types = [
-		{ value: 'club', label: 'Club' },
-		{ value: 'department', label: 'Department' },
-		{ value: 'institution', label: 'Institution' }
-	];
+	let orgTypes = $state<LoadedData<OrganizationType[]>>({
+		state: 'pending',
+		message: 'Loading organizations types...'
+	});
 	const status = [
 		{ value: 'Active', label: 'Active' },
 		{ value: 'Inactive', label: 'Inactive' }
@@ -46,9 +45,6 @@
 			return 'Select an Organization';
 		}
 	});
-	const typeTriggerContent = $derived(
-		types.find((t) => t.value === typeValue)?.label ?? 'Select organization type'
-	);
 	const typeFilterTriggerContent = $derived(
 		typeFilters.find((t) => t.value === typeFilterValue)?.label ?? 'All types'
 	);
@@ -73,10 +69,10 @@
 			const formData = new FormData(e.currentTarget as HTMLFormElement);
 
 			const name = formData.get('name') as string;
-			const type = formData.get('type') as Organization['type'];
-			const parentOrg = formData.get('org') as string;
+			const organizationTypeId = formData.get('type') as string;
+			const parentOrganizationId = formData.get('org') as string;
 
-			if (await createOrg(name, type, parentOrg)) {
+			if (await createOrg(name, organizationTypeId, parentOrganizationId)) {
 				console.log('Organization Created');
 				sheetOpen = false;
 			}
@@ -118,15 +114,17 @@
 	};
 </script>
 
-<Sheet.Root open={true}>
+<Sheet.Root bind:open={sheetOpen}>
 	<Sheet.Content class="w-full sm:min-w-100" side="right">
 		<form onsubmit={handleSubmit}>
 			<div class="overflow-auto">
-				<Sheet.Header>
-					<Sheet.Title>Add Organization</Sheet.Title>
-					<Sheet.Description>
-						Enter the details of the new organization. Click save when you're done.
-					</Sheet.Description>
+				<Sheet.Header class="mb-xs border-b border-muted-foreground">
+					<div class="flex flex-col">
+						<h2 class="text-lg font-bold">Add Organization</h2>
+						<h3 class="text-sm">
+							Enter the details of the new organization. Click save when you're done.
+						</h3>
+					</div>
 				</Sheet.Header>
 				<div class="grid flex-1 auto-rows-min gap-6 px-4">
 					{#if errorText}
@@ -134,21 +132,21 @@
 					{/if}
 					<div class="grid gap-3">
 						<Label for="name" class="text-end">Name</Label>
-						<Input name="name" />
+						<Input class="primary-input" name="name" />
 					</div>
 					<div class="grid gap-3">
 						<Label for="email" class="text-end">Type</Label>
-						<SelectButton
-							name={'type'}
-							label={'Type'}
-							bind:value={typeValue}
-							trigContent={typeTriggerContent}
-							items={types}
+						<DynamicSelectButton
+							name="type"
+							initialText="Select a type"
 							size="full"
+							value={typeValue}
+							loadFn={loadOrgTypes}
+							mapOption={(item: OrganizationType) => ({ value: item.id, label: item.name })}
 						/>
 					</div>
 					<div class="grid gap-3">
-						<Label for="org" class="text-end">Organization</Label>
+						<Label for="org" class="text-end">Parent Organization</Label>
 						<DynamicSelectButton
 							name="organization"
 							initialText="Select an Organization"

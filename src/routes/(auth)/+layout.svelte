@@ -8,7 +8,9 @@
 <Sidebar.Provider class="w-screen">
 	<AppSidebar />
 	<main class="w-full">
-		<div class="border-muted-background relative flex h-12 w-full items-center border-b p-xxxs">
+		<div
+			class="border-muted-background sticky top-0 z-50 flex h-12 w-full items-center border-b bg-background p-xxxs"
+		>
 			<Sidebar.Trigger class="z-50" />
 			<h2 class="absolute inset-0 flex w-full items-center justify-center text-center">CHW</h2>
 		</div>

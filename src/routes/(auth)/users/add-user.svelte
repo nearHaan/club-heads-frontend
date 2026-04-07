@@ -43,11 +43,11 @@
 	<Sheet.Content class="w-full sm:min-w-100" side="right">
 		<form onsubmit={handleSubmit}>
 			<div class="overflow-auto">
-				<Sheet.Header>
-					<Sheet.Title>Add User</Sheet.Title>
-					<Sheet.Description>
-						Enter the details of the new user. Click save when you're done.
-					</Sheet.Description>
+				<Sheet.Header class="mb-xs border-b border-muted-foreground">
+					<div class="flex flex-col">
+						<h2 class="text-lg font-bold">Add User</h2>
+						<h3 class="text-sm">Enter the details of the new user. Click save when you're done.</h3>
+					</div>
 				</Sheet.Header>
 				<div class="grid flex-1 auto-rows-min gap-6 px-4">
 					{#if errorText}
@@ -55,11 +55,11 @@
 					{/if}
 					<div class="grid gap-3">
 						<Label for="name" class="text-end">Name</Label>
-						<Input name="name" />
+						<Input class="primary-input" name="name" />
 					</div>
 					<div class="grid gap-3">
 						<Label for="email" class="text-end">Email</Label>
-						<Input name="email" />
+						<Input class="primary-input" name="email" />
 					</div>
 					<div class="grid gap-3">
 						<Label for="status" class="text-end">Status</Label>

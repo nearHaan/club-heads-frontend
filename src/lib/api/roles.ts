@@ -3,13 +3,9 @@ import { api } from '$lib/api';
 import type { ApiResponse, Role } from '$lib/types';
 
 export async function loadRoles() {
-	const res = await api.get('roles').json<
-		ApiResponse<{
-			roles: Role[];
-		}>
-	>();
+	const res = await api.get('roles').json<ApiResponse<Role[]>>();
 	if (res.success) {
-		return res.data.roles;
+		return res.data;
 	} else {
 		throw new Error(res.message);
 	}

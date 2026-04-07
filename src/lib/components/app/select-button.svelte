@@ -19,7 +19,7 @@
 </script>
 
 <Select.Root type="single" {name} bind:value>
-	<Select.Trigger class={`${size === 'full' ? 'w-full' : ''}`}>
+	<Select.Trigger class={`${size === 'full' ? 'w-full' : ''} rounded-xs`}>
 		{trigContent}
 	</Select.Trigger>
 	<Select.Content>

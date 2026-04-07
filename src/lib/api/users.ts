@@ -3,13 +3,9 @@ import { api } from '$lib/api';
 import type { ApiResponse, User } from '$lib/types';
 
 export async function loadUsers() {
-	const res = await api.get('users').json<
-		ApiResponse<{
-			users: User[];
-		}>
-	>();
+	const res = await api.get('users').json<ApiResponse<User[]>>();
 	if (res.success) {
-		return res.data.users;
+		return res.data;
 	} else {
 		throw new Error(res.message);
 	}
@@ -28,13 +24,9 @@ export async function createUser(name: string, email: string, status: string) {
 				password: email.split('@')[0] ?? '123456'
 			}
 		})
-		.json<
-			ApiResponse<{
-				user: User;
-			}>
-		>();
+		.json<ApiResponse<User>>();
 	if (res.success) {
-		return res.data.user;
+		return res.data;
 	} else {
 		throw new Error(res.message);
 	}
