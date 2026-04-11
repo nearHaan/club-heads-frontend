@@ -14,6 +14,18 @@ export type User = {
 	organizationRoles: OrganizationRole[];
 };
 
+export type Venue = {
+	id: number;
+	name: string;
+	venueTypeId: number;
+	organizationId: number | null;
+	maxCapacity: number;
+	accessLevel: string;
+	isAvailable: boolean;
+	unavailabilityReason: string | null;
+	isActive: boolean;
+};
+
 // TODO: Match types
 export type Organization = {
 	id: string;
@@ -52,6 +64,11 @@ export type ChildType = {
 
 export type RoleType = {
 	id: string;
+	name: string;
+};
+
+export type VenueType = {
+	id: number;
 	name: string;
 };
 
