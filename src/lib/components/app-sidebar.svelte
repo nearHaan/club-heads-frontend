@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CirclePileIcon, MonitorCogIcon, UsersIcon } from '@lucide/svelte';
+	import { BuildingIcon,CirclePileIcon, MonitorCogIcon, UsersIcon } from '@lucide/svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { IsMobile } from '$lib/hooks/is-mobile.svelte';
 
@@ -10,6 +10,11 @@
 			title: 'Users',
 			url: '/users',
 			icon: UsersIcon
+		},
+		{
+			title: 'Venues',
+			url: '/venues',
+			icon: BuildingIcon
 		},
 		{
 			title: 'Organizations',
