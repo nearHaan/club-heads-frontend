@@ -143,3 +143,28 @@ type LoadingFailure = {
 	state: 'failed';
 	message: string;
 };
+
+export type VenueTypeRole = {
+	id: number;
+	name: string;
+};
+
+export type VenueMembers=
+	{
+		id: number;
+		isActive: boolean;
+		roleId: number;
+		user: {
+			id: number;
+			fullName: string;
+			email: string;
+		};
+	}[]
+
+export type VenueFacilities = {
+		id: number;
+		facilityId: number;
+		facilityName: string;
+	}[]
+
+export type VenueMember = { id: number }

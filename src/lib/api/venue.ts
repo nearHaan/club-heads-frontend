@@ -1,5 +1,5 @@
 import { api } from '$lib/api';
-import type { ApiResponse, Venue } from '$lib/types';
+import type { ApiResponse, Venue, VenueMembers, VenueFacilities, VenueMember } from '$lib/types';
 
 export async function loadVenues() {
 	const res = await api.get('venues').json<ApiResponse<Venue[]>>();
@@ -34,7 +34,7 @@ export async function createVenue(data: CreateVenueData) {
 }
 
 export async function getVenueMembers(id: number) {
-	const res = await api.get(`venues/${id}/members`).json<ApiResponse<any[]>>();
+	const res = await api.get(`venues/${id}/members`).json<ApiResponse<VenueMembers[]>>();
 	if (res.success) {
 		return res.data;
 	} else {
@@ -47,7 +47,7 @@ export async function addMemberToVenue(id: number, memberData: { userId: number;
 		.post(`venues/${id}/members`, {
 			json: memberData
 		})
-		.json<ApiResponse<any>>();
+		.json<ApiResponse<VenueMember>>();
 	if (res.success) {
 		return res.data;
 	} else {
@@ -56,7 +56,7 @@ export async function addMemberToVenue(id: number, memberData: { userId: number;
 }
 
 export async function getVenueFacilities(id: number) {
-	const res = await api.get(`venues/${id}/facilities`).json<ApiResponse<any[]>>();
+	const res = await api.get(`venues/${id}/facilities`).json<ApiResponse<VenueFacilities[]>>();
 	if (res.success) {
 		return res.data;
 	} else {

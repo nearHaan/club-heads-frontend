@@ -1,5 +1,5 @@
 import { api } from '$lib/api';
-import type { ApiResponse, VenueType } from '$lib/types';
+import type { ApiResponse, VenueType, VenueTypeRole } from '$lib/types';
 
 export async function loadVenueTypes() {
 	const res = await api.get('venue-types').json<ApiResponse<VenueType[]>>();
@@ -11,7 +11,7 @@ export async function loadVenueTypes() {
 }
 
 export async function loadVenueTypeRoles(id: number) {
-	const res = await api.get(`venue-types/${id}/roles`).json<ApiResponse<any[]>>();
+	const res = await api.get(`venue-types/${id}/roles`).json<ApiResponse<VenueTypeRole[]>>();
 	if (res.success) {
 		return res.data;
 	} else {
