@@ -1,10 +1,11 @@
 <script lang="ts">
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { formatDateDayAndMonthAndYear, formatDateOnlyTime } from '$lib/helpers';
-	import type { EventVenueAllotment } from '$lib/types';
+	import type { EventVenueAllotment, Venue } from '$lib/types';
 	import { Plus, X } from '@lucide/svelte';
 	import VenuesDatetimeSelectionPopup from './venues-datetime-selection-popup.svelte';
 	import VenuesSelectionPopup from './venues-selection-popup.svelte';
+	import VenueDeletePopup from './venue-delete-popup.svelte';
 
 	let {
 		eventId,
@@ -14,11 +15,12 @@
 		allotedVenues: EventVenueAllotment[];
 	} = $props();
 
-	let selectedVenueId: number | null = $state(null);
-	let selectedVenueName: string | null = $state(null);
+	let selectedVenue: Venue | null = $state(null);
+	let venueSelectedForDeletetion: EventVenueAllotment | null = $state(null);
 
 	let selectVenuePopupOpen = $state(false);
 	let selectDateTimePopupOpen = $state(false);
+	let deleteVenuePopupOpen = $state(false);
 </script>
 
 <div class="space-y-2">
@@ -48,7 +50,14 @@
 					<div class="flex place-items-center justify-between gap-4">
 						<div>{allotment.venue.name}</div>
 
-						<Button variant="ghost" size="icon-sm" onclick={() => {}}>
+						<Button
+							variant="ghost"
+							size="icon-sm"
+							onclick={() => {
+								venueSelectedForDeletetion = allotment;
+								deleteVenuePopupOpen = true;
+							}}
+						>
 							<X />
 						</Button>
 					</div>
@@ -74,14 +83,19 @@
 	{allotedVenues}
 	bind:isDateTimePopupOpen={selectDateTimePopupOpen}
 	bind:isOpen={selectVenuePopupOpen}
-	bind:selectedVenueId
-	bind:selectedVenueName
+	bind:selectedVenue
 />
 
 <VenuesDatetimeSelectionPopup
 	{eventId}
 	bind:isOpen={selectDateTimePopupOpen}
-	bind:selectedVenueId
-	bind:selectedVenueName
+	bind:selectedVenue
 	bind:allotedVenues
+/>
+
+<VenueDeletePopup
+	bind:isOpen={deleteVenuePopupOpen}
+	bind:allotedVenues
+	venue={venueSelectedForDeletetion!}
+	{eventId}
 />

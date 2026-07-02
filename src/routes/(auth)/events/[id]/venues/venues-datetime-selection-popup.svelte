@@ -1,22 +1,19 @@
 <script lang="ts">
 	import { allotEventVenue } from '$lib/api/events/venue-allotments';
-	import { loadVenues } from '$lib/api/venue';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
-	import { type EventVenueAllotment, type LoadedData, type Venue } from '$lib/types';
-	import { Calendar, Clock, Loader, Search, X } from '@lucide/svelte';
+	import { type EventVenueAllotment, type Venue } from '$lib/types';
+	import { Calendar, Clock, Loader } from '@lucide/svelte';
 
 	let {
 		eventId,
 		isOpen = $bindable(false),
-		selectedVenueId = $bindable(null),
-		selectedVenueName = $bindable(null),
+		selectedVenue = $bindable(),
 		allotedVenues = $bindable()
 	}: {
 		eventId: number;
 		isOpen: boolean;
-		selectedVenueId: null | number;
-		selectedVenueName: null | string;
+		selectedVenue: null | Venue;
 		allotedVenues: EventVenueAllotment[];
 	} = $props();
 
@@ -56,18 +53,17 @@
 			const startsAt = toISOString(newStartDate, newStartTime);
 			const endsAt = toISOString(newEndDate, newEndTime);
 
-			const { id } = await allotEventVenue(eventId, selectedVenueId!, startsAt, endsAt);
+			const { id } = await allotEventVenue(eventId, selectedVenue?.id!, startsAt, endsAt);
 			allotedVenues.push({
 				id: id,
 				venue: {
-					id: selectedVenueId!,
-					name: selectedVenueName!
+					id: selectedVenue?.id!,
+					name: selectedVenue?.name!
 				},
 				startsAt,
 				endsAt
 			});
-			selectedVenueId = null;
-			selectedVenueName = null;
+			selectedVenue = null;
 			isOpen = false;
 		} catch (err: any) {
 			errorText = err.message ?? 'Something went wrong';
@@ -83,7 +79,7 @@
 			<div class="flex flex-col gap-sm p-sm">
 				<p class="mr-5 text-lg">Allot a new venue for the event</p>
 				<div class="flex h-10 w-full items-center gap-x-xxs rounded bg-muted p-xxs">
-					{selectedVenueName}
+					{selectedVenue?.name}
 				</div>
 				<div class="flex w-full flex-col justify-between gap-sm overflow-auto">
 					<div class="flex flex-col items-start gap-xxs text-sm">

@@ -82,7 +82,7 @@
 		<Dialog.Content class="flex flex-col overflow-hidden rounded sm:max-w-xl">
 			<p class="/bg-muted border-b px-3 py-4 text-sm">Delete Invite</p>
 			<div class="flex min-w-60 flex-col gap-2.5 p-3">
-				<p class="text-sm leading-5">
+				<p class="text-sm leading-6">
 					I <span
 						>{#if roles.length === 1}
 							<span class="h-8 border border-muted-foreground bg-primary/10 p-0.5 px-xxs"

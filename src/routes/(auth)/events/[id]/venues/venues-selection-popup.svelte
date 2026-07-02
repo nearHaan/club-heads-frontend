@@ -8,14 +8,12 @@
 		isOpen = $bindable(false),
 		isDateTimePopupOpen = $bindable(false),
 		allotedVenues = $bindable(),
-		selectedVenueId = $bindable(),
-		selectedVenueName = $bindable()
+		selectedVenue = $bindable()
 	}: {
 		isOpen: boolean;
 		isDateTimePopupOpen: boolean;
 		allotedVenues: EventVenueAllotment[];
-		selectedVenueId: null | number;
-		selectedVenueName: null | string;
+		selectedVenue: null | Venue;
 	} = $props();
 
 	let venues = $state<LoadedData<Venue[]>>({
@@ -78,8 +76,7 @@
 							{#each filteredVenues as v}
 								<button
 									onclick={() => {
-										selectedVenueId = v.id;
-										selectedVenueName = v.name;
+										selectedVenue = v;
 										isDateTimePopupOpen = true;
 										isOpen = false;
 									}}

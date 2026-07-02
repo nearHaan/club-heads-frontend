@@ -10,11 +10,11 @@
 		Organization,
 		WorkflowInstance
 	} from '$lib/types';
-	import OrganizersSection from './organizers-section.svelte';
-	import VenuesSection from './venues-section.svelte';
+	import OrganizersSection from './organizers/organizers-section.svelte';
+	import VenuesSection from './venues/venues-section.svelte';
 	import { loadOrganizerInvitations } from '$lib/api/events/organizer-invitations';
 	import { loadOrgs } from '$lib/api/organizations';
-	import OverviewSection from './overview-section.svelte';
+	import OverviewSection from './overview/overview-section.svelte';
 	import WorkflowsSection from './workflows-section.svelte';
 	import { loadEventWorkflowsLatest } from '$lib/api/events/workflow-instances';
 	import { submitEvent } from '$lib/api/events/events';
@@ -223,6 +223,5 @@
 				</div>
 			</div>
 		</div>
-		<!-- <TabsScrollBar bind:activeTab /> -->
 	</div>
 {/if}
