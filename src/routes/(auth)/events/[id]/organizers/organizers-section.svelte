@@ -29,10 +29,6 @@
 		eventId: number;
 		eventName: string;
 	} = $props();
-
-	let newOrganizerOrganizationId: number | null = $state(null);
-	let newOrganizerRole: EventOrganizerRole = $state('co_host');
-
 	let errorText = $state('');
 
 	let deletingOrganizerId: null | number = $state(null);
