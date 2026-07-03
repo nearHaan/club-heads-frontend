@@ -180,3 +180,17 @@
 		scrollbar-width: none; /* Firefox */
 	}
 }
+
+@utility no-spinner {
+	appearance: textfield;
+
+	&::-webkit-inner-spin-button,
+	&::-webkit-outer-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+}
+
+.no-spinner[type='number'] {
+	-moz-appearance: textfield;
+}
