@@ -22,20 +22,22 @@ export type WorkflowInstance = {
 	id: number;
 	createdAt: string;
 	initialStepId: number | null;
-	status: 'overridden' | 'active' | 'completed' | 'denied' | 'aborted';
+	status: 'denied' | 'overridden' | 'active' | 'completed' | 'aborted';
 	completedAt: string | null;
-	eventId: number;
-	submittedBy: number;
+	submitter: {
+		id: number;
+		fullName: string;
+	};
 	steps: {
 		id: number;
 		name: string;
 		nextStepId: number | null;
-		status: 'pending' | 'overridden' | 'active' | 'completed' | 'denied' | 'skipped' | 'blocked';
+		status: 'denied' | 'pending' | 'overridden' | 'active' | 'completed' | 'skipped' | 'blocked';
 		completedAt: string | null;
-		stepOpen: boolean;
+		stepOpen: null | boolean;
 		roles: {
 			id: number;
-			targetGroupApprovalCriteria: WorkflowTargetGroupApprovalCriteriaType;
+			targetGroupApprovalCriteria: 'any' | 'all';
 			role: {
 				id: number;
 				name: string;
@@ -54,7 +56,7 @@ export type WorkflowInstance = {
 				};
 				assignments: {
 					id: number;
-					status: 'pending' | 'approved' | 'denied' | 'skipped';
+					status: 'approved' | 'denied' | 'pending' | 'skipped';
 					completedAt: string | null;
 					remarks: string | null;
 					userRole: {

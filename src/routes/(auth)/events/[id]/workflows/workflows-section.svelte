@@ -83,7 +83,6 @@
 							Overidden
 						{/if}
 					</div>
-
 					<div class="text-xs text-muted-foreground">
 						{#if activeWorkflow.data.status !== 'active' && activeWorkflow.data.completedAt != null}
 							Completed at {formatDate(activeWorkflow.data.completedAt)}
@@ -105,110 +104,115 @@
 							)
 						)}
 
-						<div class="flex gap-2"></div>
+						{#if assignments.length > 0}
+							<div class="flex gap-2"></div>
 
-						<div>
-							<button
-								class="flex w-full place-items-center gap-2"
-								onclick={() => {
-									if (assignments.length === 0) return;
-									step.stepOpen = !step.stepOpen;
-								}}
-							>
-								<div
-									class={[
-										'aspect-square rounded-full p-1 text-background',
-										step.status === 'completed'
-											? 'bg-emerald-600'
-											: step.status === 'denied' ||
-												  step.status === 'blocked' ||
-												  step.status === 'overridden'
-												? 'bg-red-700'
-												: step.status === 'skipped'
-													? 'bg-neutral-300'
-													: step.status === 'active'
-														? 'bg-amber-300 text-foreground'
-														: step.status === 'pending'
-															? 'bg-background text-foreground'
-															: 'bg-background text-foreground'
-									]}
+							<div>
+								<button
+									class="flex w-full place-items-center gap-2"
+									onclick={() => {
+										if (assignments.length === 0) return;
+										step.stepOpen = !step.stepOpen;
+									}}
 								>
-									{#if step.status === 'completed'}
-										<Check size="12" strokeWidth={3} />
-									{:else if step.status === 'denied'}
-										<X size="12" strokeWidth={3} />
-									{:else if step.status === 'skipped'}
-										<ChevronLast size="12" strokeWidth={3} />
-									{:else if step.status === 'active'}
-										<LoaderCircle class="animate-spin" size="12" strokeWidth={3} />
-									{:else if step.status === 'pending'}
-										<Clock size="12" strokeWidth={3} />
-									{:else if step.status === 'blocked'}
-										<CircleSlash size="12" strokeWidth={3} />
-									{:else if step.status === 'overridden'}
-										<CopySlash size="12" strokeWidth={3} />
-									{:else}
-										<Skull size="12" strokeWidth={3} />
-									{/if}
-								</div>
-
-								<div class="grow text-left">{step.name}</div>
-
-								{#if assignments.length > 0}
-									<ChevronDown
-										size="16"
+									<div
 										class={[
-											'transition-all duration-300',
-											step.stepOpen ? 'rotate-180' : 'rotate-0'
+											'aspect-square rounded-full p-1 text-background',
+											step.status === 'completed'
+												? 'bg-emerald-600'
+												: step.status === 'denied' ||
+													  step.status === 'blocked' ||
+													  step.status === 'overridden'
+													? 'bg-red-700'
+													: step.status === 'skipped'
+														? 'bg-neutral-300'
+														: step.status === 'active'
+															? 'bg-amber-300 text-foreground'
+															: step.status === 'pending'
+																? 'bg-background text-foreground'
+																: 'bg-background text-foreground'
 										]}
-									/>
-								{/if}
-							</button>
+									>
+										{#if step.status === 'completed'}
+											<Check size="12" strokeWidth={3} />
+										{:else if step.status === 'denied'}
+											<X size="12" strokeWidth={3} />
+										{:else if step.status === 'skipped'}
+											<ChevronLast size="12" strokeWidth={3} />
+										{:else if step.status === 'active'}
+											<LoaderCircle class="animate-spin" size="12" strokeWidth={3} />
+										{:else if step.status === 'pending'}
+											<Clock size="12" strokeWidth={3} />
+										{:else if step.status === 'blocked'}
+											<CircleSlash size="12" strokeWidth={3} />
+										{:else if step.status === 'overridden'}
+											<CopySlash size="12" strokeWidth={3} />
+										{:else}
+											<Skull size="12" strokeWidth={3} />
+										{/if}
+									</div>
 
-							{#if assignments.length > 0 && step.stepOpen}
-								<div transition:slide class="mt-1 ml-2 border-l-2 border-dashed pl-5">
-									<div class="divide-y">
-										{#each assignments as assignment}
-											<div class="flex place-items-start justify-between gap-2 py-1">
-												<div class="w-full">
-													<div class="flex justify-between gap-2">
-														<div class="text-sm font-medium">
-															{assignment.userRole.user.fullName}
-														</div>
+									<div class="grow text-left">{step.name}</div>
 
-														<div
-															class={[
-																'text-xs',
-																assignment.status === 'approved'
-																	? 'font-semibold text-emerald-600'
-																	: assignment.status === 'skipped'
-																		? 'text-muted-foreground'
-																		: assignment.status === 'denied'
-																			? 'font-semibold text-red-700'
-																			: assignment.status === 'pending'
-																				? 'text-amber-400'
-																				: ''
-															]}
-														>
-															{assignment.status}
+									{#if assignments.length > 0}
+										<ChevronDown
+											size="16"
+											class={[
+												'transition-all duration-300',
+												step.stepOpen ? 'rotate-180' : 'rotate-0'
+											]}
+										/>
+									{/if}
+								</button>
+
+								{#if assignments.length > 0 && step.stepOpen}
+									<div transition:slide class="mt-1 ml-2 border-l-2 border-dashed pl-5">
+										<div class="divide-y">
+											{#each assignments as assignment}
+												<div class="flex place-items-start justify-between gap-2 py-1">
+													<div class="w-full">
+														<div class="flex justify-between gap-2">
+															<div class="text-sm font-medium">
+																{assignment.userRole.user.fullName}
+															</div>
+
+															<div
+																class={[
+																	'text-xs',
+																	assignment.status === 'approved'
+																		? 'font-semibold text-emerald-600'
+																		: assignment.status === 'skipped'
+																			? 'text-muted-foreground'
+																			: assignment.status === 'denied'
+																				? 'font-semibold text-red-700'
+																				: assignment.status === 'pending'
+																					? 'text-amber-400'
+																					: ''
+																]}
+															>
+																{assignment.status}
+															</div>
 														</div>
-													</div>
-													<div class="text-xs text-muted-foreground">
-														{assignment.stepRole.role.name} &middot; {assignment.group.scope.name}
+														<div class="text-xs text-muted-foreground">
+															{assignment.stepRole.role.name} &middot; {assignment.group.scope.name}
+														</div>
 													</div>
 												</div>
-											</div>
-										{/each}
+											{/each}
+										</div>
 									</div>
-								</div>
-							{/if}
-						</div>
+								{/if}
+							</div>
+						{/if}
 					{/each}
+				</div>
+				<div class="text-xs text-muted-foreground">
+					Submitted by <span class="text-foreground">{activeWorkflow.data.submitter.fullName}</span>
 				</div>
 
 				<div class="flex place-items-center justify-between">
 					{#if activeWorkflow.data.status === 'active'}
-						<Button size="sm" variant="outline" class="text-destructive">
+						<Button size="sm" variant="outline" class="text-destructive" onclick={() => {}}>
 							<CircleSlash /> Abort
 						</Button>
 					{/if}
