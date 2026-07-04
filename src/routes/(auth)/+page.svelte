@@ -57,7 +57,7 @@
 	<div class="flex h-full flex-col gap-y-8 p-r-pad">
 		{#if allEmpty}
 			<div class="flex h-full w-full flex-col items-center justify-center">
-				<div class="flex flex-col items-center bg-muted px-10 py-20">
+				<div class="flex flex-col items-center px-10 py-20">
 					<Inbox />
 					<p>You have no messages</p>
 					<p class="text-xs text-muted-foreground">Find your important messages here</p>

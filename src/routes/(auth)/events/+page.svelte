@@ -176,10 +176,14 @@
 
 	<div class="flex flex-col gap-y-8 p-r-pad">
 		{#if events.state === 'pending' || events.state === 'failed'}
-			<p>{events.message}</p>
+			<div class="grid animate-pulse grid-cols-2 gap-2">
+				{#each Array.from({ length: 6 }) as _}
+					<div class=" min-h-32 animate-pulse rounded-md border bg-muted sm:min-w-56"></div>
+				{/each}
+			</div>
 		{:else if events.state === 'success'}
 			{#if eventsCount === 0}
-				<div>No events found.</div>
+				<div>No events found</div>
 			{:else}
 				<div class="space-y-4">
 					{#each Object.values(GROUP_DETAILS) as group}
@@ -200,7 +204,7 @@
 										{@const mainOrganizer = hostOrganizer ?? event.organizers[0]}
 										<a
 											class={[
-												'flex min-h-32 cursor-pointer flex-col items-center justify-between rounded-md border transition-all duration-150 hover:bg-foreground/5 sm:min-w-56',
+												'flex min-h-32 cursor-pointer flex-col items-center justify-between overflow-hidden rounded-md border transition-all duration-150 hover:bg-foreground/5 sm:min-w-56',
 												'outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50'
 											]}
 											href="/events/{event.id}"
