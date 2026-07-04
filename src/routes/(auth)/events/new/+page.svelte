@@ -3,11 +3,14 @@
 	import Input from '$lib/components/ui/input/input.svelte';
 	import {
 		BadgeQuestionMark,
+		Blend,
+		Check,
 		ChevronDown,
 		CircleSlash,
 		GitMerge,
 		Link,
 		Loader,
+		MapPin,
 		Plus,
 		Save,
 		Skull,
@@ -297,7 +300,7 @@
 		</div>
 		<div class="flex flex-col gap-1 text-sm max-sm:w-full">
 			Event Type
-			<Popover.Root>
+			<!-- <Popover.Root>
 				<Popover.Trigger
 					disabled={eventTypes.state !== 'success'}
 					class={buttonVariants({
@@ -384,7 +387,66 @@
 						{/each}
 					</Popover.Content>
 				{/if}
-			</Popover.Root>
+			</Popover.Root> -->
+			{#if eventTypes.state !== 'success'}
+				<div
+					class={buttonVariants({
+						variant: 'outline',
+						size: 'sm',
+						class: 'flex justify-start rounded-sm text-muted-foreground/80'
+					})}
+				>
+					{eventTypes.message}
+				</div>
+			{:else}
+				<div>
+					{#each eventTypes.data as eventType}
+						<Button
+							variant="outline"
+							size="sm"
+							class={[
+								'flex h-auto w-full flex-col items-start rounded-none p-2 first:rounded-t-sm last:rounded-b-sm',
+								activeEventType?.id === eventType.id
+									? 'border-primary/20 bg-primary/10 hover:bg-primary/15'
+									: ''
+							]}
+							onclick={() => {
+								activeEventType = eventType;
+							}}
+						>
+							<div class="flex w-full flex-col items-start gap-1">
+								<div class="flex w-full items-center justify-between">
+									<p class="text-base">{eventType.name}</p>
+									{#if eventType.id === activeEventType?.id}
+										<Check size="15" />
+									{/if}
+								</div>
+								<div class="flex flex-col justify-start gap-1 text-xs text-muted-foreground">
+									<div class="flex items-center gap-1">
+										<MapPin />
+										{#if eventType.venuePolicy === 'optional'}
+											Venues are optional
+										{:else if eventType.venuePolicy === 'forbidden'}
+											Venues not supported
+										{:else}At least one venue required
+										{/if}
+									</div>
+									<div class="flex items-center gap-1">
+										<Blend />
+										{#if eventType.collaborationPolicy === 'optional'}
+											Organizers are optional
+										{:else if eventType.collaborationPolicy === 'forbidden'}
+											Collaboration not supported
+										{:else}
+											At least one organizer required
+										{/if}
+									</div>
+								</div>
+							</div>
+						</Button>
+					{/each}
+				</div>
+			{/if}
 		</div>
 		<div class="flex flex-col gap-1 text-sm max-sm:w-full">
 			Event Category
