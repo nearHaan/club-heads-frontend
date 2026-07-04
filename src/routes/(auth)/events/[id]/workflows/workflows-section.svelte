@@ -21,10 +21,12 @@
 
 	let {
 		eventId,
-		activeWorkflow
+		activeWorkflow,
+		trigReload = $bindable()
 	}: {
 		eventId: number;
 		activeWorkflow: LoadedData<WorkflowInstance | null>;
+		trigReload: {};
 	} = $props();
 
 	function isStepPending(step: WorkflowInstance['steps'][0]) {
@@ -59,6 +61,7 @@
 		try {
 			abortLoading = true;
 			await abortEventWorkflow(eventId, activeWorkflow.data?.id!);
+			trigReload = { ...trigReload };
 		} catch (err: any) {
 			console.error(err.message ?? 'Failed to abort');
 		} finally {

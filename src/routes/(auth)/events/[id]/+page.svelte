@@ -53,6 +53,7 @@
 	let errorText = $state('');
 	let successText = $state('');
 	let submitLoading = $state(false);
+	let trigReload = $state({ reload: true }); //to force to reload event data
 
 	function showMessage(msg: string, type: 'success' | 'error') {
 		if (type === 'success') {
@@ -76,7 +77,7 @@
 			submitLoading = true;
 			await submitEvent(event.data.id);
 			showMessage('Event Submitted', 'success');
-			loadEventData();
+			trigReload = { ...trigReload };
 		} catch (err: any) {
 			showMessage(err.message ?? 'Something went wrong', 'error');
 		} finally {
@@ -151,7 +152,9 @@
 	}
 
 	$effect(() => {
-		loadEventData();
+		if (trigReload) {
+			loadEventData();
+		}
 	});
 
 	let editSheetOpen = $state(false);
@@ -163,7 +166,7 @@
 			cancelEventLoading = true;
 			await cancelEvent(event.data.id);
 			showMessage('Event Cancelled', 'success');
-			loadEventData();
+			trigReload = { ...trigReload };
 		} catch (err: any) {
 			showMessage(err.message ?? 'Something went wrong', 'error');
 		} finally {
@@ -239,7 +242,7 @@
 					{organizations}
 				/>
 				<VenuesSection eventId={event.data.id} bind:allotedVenues={event.data.venueAllotments} />
-				<WorkflowsSection eventId={event.data.id} activeWorkflow={latestWorkflow} />
+				<WorkflowsSection eventId={event.data.id} activeWorkflow={latestWorkflow} bind:trigReload />
 
 				<div class="flex w-full gap-xs max-sm:flex-col-reverse">
 					{#if event.data.status === 'approved'}
