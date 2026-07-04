@@ -13,6 +13,18 @@ export async function submitEvent(eventId: number) {
 	}
 }
 
+export async function cancelEvent(eventId: number) {
+	if (!eventId) {
+		throw new Error('Event ID is required');
+	}
+	const res = await api.post(`events/${eventId}/cancel`).json<ApiResponse<boolean>>();
+	if (res.success) {
+		return res.data;
+	} else {
+		throw new Error(res.message);
+	}
+}
+
 export async function updateEvent(id: number, data: UpdateEventData) {
 	if (!id) {
 		throw new Error('Event ID required');

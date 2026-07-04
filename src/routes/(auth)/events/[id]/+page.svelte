@@ -17,7 +17,7 @@
 	import OverviewSection from './overview/overview-section.svelte';
 	import WorkflowsSection from './workflows/workflows-section.svelte';
 	import { loadEventWorkflowsLatest } from '$lib/api/events/workflow-instances';
-	import { submitEvent } from '$lib/api/events/events';
+	import { cancelEvent, submitEvent } from '$lib/api/events/events';
 	import { CheckCircle, Edit, Loader, XCircle } from '@lucide/svelte';
 	import { eventStatusColors, eventStatusTextColors } from '$lib/constants';
 	import Button, { buttonVariants } from '$lib/components/ui/button/button.svelte';
@@ -54,6 +54,20 @@
 	let successText = $state('');
 	let submitLoading = $state(false);
 
+	function showMessage(msg: string, type: 'success' | 'error') {
+		if (type === 'success') {
+			successText = msg;
+			setTimeout(() => {
+				successText = '';
+			}, 4000);
+		} else {
+			errorText = msg;
+			setTimeout(() => {
+				errorText = '';
+			}, 4000);
+		}
+	}
+
 	async function onSubmitEvent() {
 		successText = '';
 		if (event.state !== 'success') return;
@@ -61,16 +75,10 @@
 			errorText = '';
 			submitLoading = true;
 			await submitEvent(event.data.id);
-			successText = 'Event Submitted';
+			showMessage('Event Submitted', 'success');
 			loadEventData();
-			setTimeout(() => {
-				successText = '';
-			}, 4000);
 		} catch (err: any) {
-			errorText = err.message ?? 'Something went wrong';
-			setTimeout(() => {
-				errorText = '';
-			}, 4000);
+			showMessage(err.message ?? 'Something went wrong', 'error');
 		} finally {
 			submitLoading = false;
 		}
@@ -147,7 +155,21 @@
 	});
 
 	let editSheetOpen = $state(false);
-	let editBtnTooltipOpen = $state(false);
+	let cancelEventLoading = $state(false);
+
+	async function onCancelEvent() {
+		if (event.state !== 'success') return;
+		try {
+			cancelEventLoading = true;
+			await cancelEvent(event.data.id);
+			showMessage('Event Cancelled', 'success');
+			loadEventData();
+		} catch (err: any) {
+			showMessage(err.message ?? 'Something went wrong', 'error');
+		} finally {
+			cancelEventLoading = false;
+		}
+	}
 </script>
 
 {#if event.state === 'pending'}
@@ -220,9 +242,19 @@
 				<WorkflowsSection eventId={event.data.id} activeWorkflow={latestWorkflow} />
 
 				<div class="flex w-full gap-xs max-sm:flex-col-reverse">
-					<Button class="bg-red-600 text-white hover:bg-red-800 sm:flex-1">
-						<XCircle size="15" /> Cancel Event
-					</Button>
+					{#if event.data.status === 'approved'}
+						<Button
+							onclick={onCancelEvent}
+							disabled={cancelEventLoading}
+							class="bg-red-600 text-white hover:bg-red-800 sm:flex-1"
+						>
+							{#if cancelEventLoading}
+								<Loader size="15" class="animate-spin" />
+							{:else}
+								<XCircle size="15" />
+							{/if} Cancel Event
+						</Button>
+					{/if}
 					{#if event.data.status !== 'pending'}
 						<Button onclick={onSubmitEvent} class="sm:flex-1">
 							{#if submitLoading}
