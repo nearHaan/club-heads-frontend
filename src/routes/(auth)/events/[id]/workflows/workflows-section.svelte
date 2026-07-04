@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { abortEventWorkflow } from '$lib/api/events/workflow-instances';
 	import { Button } from '$lib/components/ui/button';
-	import { formatDate } from '$lib/helpers';
+	import { formatDate, formatDateDayAndMonth, formatDateOnlyTime } from '$lib/helpers';
 	import type { LoadedData, WorkflowInstance } from '$lib/types';
 	import {
 		Check,
@@ -10,8 +10,15 @@
 		CircleSlash,
 		Clock,
 		CopySlash,
+		CornerDownRight,
+		Dot,
 		Loader,
 		LoaderCircle,
+		MessageCircle,
+		MessageCircleMore,
+		MessageSquareDot,
+		MessageSquareQuote,
+		Quote,
 		ReceiptText,
 		Skull,
 		Workflow,
@@ -29,7 +36,9 @@
 		trigReload: {};
 	} = $props();
 
-	function isStepPending(step: WorkflowInstance['steps'][0]) {
+	let showFullDetails = $state(false);
+
+	function isStepPendingOrDenied(step: WorkflowInstance['steps'][0]) {
 		return step.roles.some((role) =>
 			role.targetGroups.some((group) =>
 				group.assignments.some(
@@ -39,23 +48,47 @@
 		);
 	}
 
-	$effect(() => {
+	function viewFullDetails() {
+		if (activeWorkflow.state !== 'success') return;
+		if (activeWorkflow.data === null) return;
+		showFullDetails = true;
+		for (const step of activeWorkflow.data.steps) {
+			step.stepOpen = true;
+		}
+	}
+
+	function viewLessDetails() {
+		if (activeWorkflow.state !== 'success') return;
+		if (activeWorkflow.data === null) return;
+		showFullDetails = false;
+		for (const step of activeWorkflow.data.steps) {
+			step.stepOpen = false;
+		}
+		openActiveStep();
+	}
+
+	function openActiveStep() {
 		if (activeWorkflow.state !== 'success') return;
 		if (activeWorkflow.data === null) return;
 
 		let firstPendingFound = false;
 
 		for (const step of activeWorkflow.data.steps) {
-			if (!firstPendingFound && isStepPending(step)) {
+			if (!firstPendingFound && isStepPendingOrDenied(step)) {
 				step.stepOpen = true;
 				firstPendingFound = true;
 			} else {
 				step.stepOpen = false;
 			}
 		}
+	}
+
+	$effect(() => {
+		openActiveStep();
 	});
 
 	let abortLoading = $state(false);
+
 	async function abortWorkflow() {
 		if (activeWorkflow.state !== 'success') return;
 		try {
@@ -123,6 +156,7 @@
 						)}
 
 						{#if assignments.length > 0}
+							{@const containsRemarks = assignments.some((a) => a.remarks)}
 							<div class="flex gap-2"></div>
 
 							<div>
@@ -170,8 +204,12 @@
 										{/if}
 									</div>
 
-									<div class="grow text-left">{step.name}</div>
-
+									<div class={['text-left', containsRemarks ? '' : 'grow']}>{step.name}</div>
+									{#if containsRemarks}
+										<div class="grow">
+											<div class="aspect-square h-1 animate-pulse rounded-full bg-green-700"></div>
+										</div>
+									{/if}
 									{#if assignments.length > 0}
 										<ChevronDown
 											size="16"
@@ -211,8 +249,42 @@
 																{assignment.status}
 															</div>
 														</div>
-														<div class="text-xs text-muted-foreground">
-															{assignment.stepRole.role.name} &middot; {assignment.group.scope.name}
+														<div class="flex flex-col text-xs">
+															<div class="text-muted-foreground">
+																{assignment.stepRole.role.name} &middot; {assignment.group.scope
+																	.name}
+															</div>
+															{#if assignment.remarks}
+																<div transition:slide class="flex gap-2 text-muted-foreground">
+																	<div class="ml-1">
+																		<div class="h-1 border-l border-muted-foreground"></div>
+																		<div
+																			class="h-3 w-2 rounded-bl-sm border-b border-l border-muted-foreground"
+																		></div>
+																	</div>
+																	<div class="flex gap-0.5">
+																		<Quote
+																			class="mt-2 rotate-180 fill-muted-foreground text-transparent"
+																			size={10}
+																		/>
+																		<div class="mt-2 w-fit text-sm text-foreground">
+																			{assignment.remarks}
+																		</div>
+																		<Quote
+																			class="mt-2 fill-muted-foreground text-transparent"
+																			size={10}
+																		/>
+																	</div>
+																</div>
+															{/if}
+															{#if assignment.completedAt && showFullDetails}
+																<div
+																	transition:slide
+																	class="mt-2 text-[10px] text-muted-foreground/80"
+																>
+																	{formatDate(assignment.completedAt)}
+																</div>
+															{/if}
 														</div>
 													</div>
 												</div>
@@ -245,8 +317,24 @@
 						</Button>
 					{/if}
 
-					<Button size="sm" variant="ghost" class="ml-auto" href={`/events/${eventId}/workflows`}>
-						<ReceiptText /> View details
+					<Button
+						onclick={() => {
+							if (showFullDetails === true) {
+								viewLessDetails();
+							} else {
+								viewFullDetails();
+							}
+						}}
+						size="sm"
+						variant="ghost"
+						class="ml-auto"
+					>
+						<ReceiptText />
+						{#if showFullDetails}
+							View less
+						{:else}
+							View details
+						{/if}
 					</Button>
 				</div>
 			</div>
