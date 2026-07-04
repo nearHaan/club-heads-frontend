@@ -176,8 +176,15 @@
 </script>
 
 {#if event.state === 'pending'}
-	<div class="p-r-pad">
-		<p>{event.message}</p>
+	<div class="mx-auto flex w-full max-w-prose animate-pulse flex-col gap-1 p-4">
+		<div class="h-5 w-20 bg-neutral-200/80"></div>
+		<div class="h-10 w-50 bg-neutral-200/80"></div>
+		<div class="mt-8 h-30 w-full bg-neutral-200/80"></div>
+		<div class="h-20 w-full bg-neutral-200/80"></div>
+		<div class="h-20 w-full bg-neutral-200/80"></div>
+		<div class="mt-8 h-30 w-full bg-neutral-200/80"></div>
+		<div class="h-20 w-full bg-neutral-200/80"></div>
+		<div class="h-20 w-full bg-neutral-200/80"></div>
 	</div>
 {:else if event.state === 'failed'}
 	<div class="p-r-pad">

@@ -178,7 +178,9 @@
 		{#if events.state === 'pending' || events.state === 'failed'}
 			<div class="grid animate-pulse grid-cols-2 gap-2">
 				{#each Array.from({ length: 6 }) as _}
-					<div class=" min-h-32 animate-pulse rounded-md border bg-muted sm:min-w-56"></div>
+					<div
+						class=" min-h-32 animate-pulse rounded-md border bg-neutral-200/80 sm:min-w-56"
+					></div>
 				{/each}
 			</div>
 		{:else if events.state === 'success'}

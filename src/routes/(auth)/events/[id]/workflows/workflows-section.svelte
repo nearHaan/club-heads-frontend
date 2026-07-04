@@ -109,7 +109,12 @@
 	</div>
 
 	{#if activeWorkflow.state === 'pending'}
-		<p class="italic">Loading workflow...</p>
+		<div class="flex w-full animate-pulse flex-col gap-1 p-4">
+			<div class="h-5 w-20 bg-neutral-200/90"></div>
+			<div class="h-2 w-40 bg-neutral-200/80"></div>
+			<div class="mt-8 h-10 w-full bg-neutral-200/80"></div>
+			<div class="h-10 w-full bg-neutral-200/80"></div>
+		</div>
 	{:else if activeWorkflow.state === 'failed'}
 		<p class="text-red-400 italic">Failed to load workflow</p>
 	{:else if activeWorkflow.state === 'success'}
