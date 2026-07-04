@@ -460,7 +460,9 @@
 						size="sm"
 						variant="link"
 						class="h-auto w-min cursor-pointer text-destructive hover:animate-pulse"
-						onclick={() => {}}
+						onclick={() => {
+							selectedParentEvent = null;
+						}}
 					>
 						<Unlink />
 					</Button>
