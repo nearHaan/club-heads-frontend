@@ -18,7 +18,7 @@
 >
 	<Input
 		type="time"
-		step="1"
+		step="60"
 		bind:value
 		class={[
 			'appearance-none border-none bg-transparent p-0 text-sm shadow-none focus:outline-none focus-visible:ring-0 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none'

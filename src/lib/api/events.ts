@@ -58,18 +58,6 @@ export async function getEvent(id: number) {
 	}
 }
 
-export async function updateEvent(id: number, data: UpdateEventData) {
-	if (!id) {
-		throw new Error('Event ID required');
-	}
-	const res = await api.patch(`events/${id}`, { json: data }).json<ApiResponse<{ id: number }>>();
-	if (res.success) {
-		return res.data;
-	} else {
-		throw new Error(res.message);
-	}
-}
-
 export async function createVenueAllotment(eventId: number, data: CreateVenueAllotmentData) {
 	if (!eventId) {
 		throw new Error('Event ID required');

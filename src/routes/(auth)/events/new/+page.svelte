@@ -45,9 +45,9 @@
 	let expectedParticipants = $state<number>(0);
 	let requestDetails = $state('');
 	let startDate: CalendarDate | undefined = $state(undefined);
-	let startTime: string = $state('10:00:00');
+	let startTime: string = $state('10:00');
 	let endDate: CalendarDate | undefined = $state(undefined);
-	let endTime: string = $state('10:00:00');
+	let endTime: string = $state('10:00');
 	let activeEventType: EventType | null = $state(null);
 	let activeEventCategory: EventCategory | null = $state(null);
 	let parentEventsPopupOpen = $state(false);
@@ -204,7 +204,7 @@
 					{/if}
 				</Popover.Trigger>
 				{#if eventCreatableOrganizations.state === 'success'}
-					<Popover.Content class="p-1" align="start">
+					<Popover.Content class="max-h-60 p-1" align="start">
 						<div class="items-start">
 							{#each eventCreatableOrganizations.data as organization}
 								<Popover.Close
@@ -229,7 +229,7 @@
 				class="rounded border border-muted-foreground px-2 py-1 text-lg placeholder:text-muted-foreground"
 			/>
 		</div>
-		<div class="flex gap-6 max-sm:flex-col">
+		<div class="flex gap-6">
 			<div class="flex flex-col gap-1 text-sm max-sm:w-full">
 				Start Date
 				<div class="flex flex-col">
@@ -257,6 +257,7 @@
 			Expected Participants
 			<div class="flex items-center justify-center gap-4 max-sm:py-2 sm:justify-start">
 				<button
+					type="button"
 					onclick={() => {
 						expectedParticipants =
 							expectedParticipants - 1 >= 0 ? expectedParticipants - 1 : expectedParticipants;
@@ -264,6 +265,7 @@
 					class="text-base font-semibold text-primary/50 sm:hidden">-1</button
 				>
 				<button
+					type="button"
 					onclick={() => {
 						expectedParticipants =
 							expectedParticipants - 10 >= 0 ? expectedParticipants - 10 : expectedParticipants;
@@ -278,12 +280,14 @@
 					class="w-20 rounded border border-muted-foreground px-2 py-1 text-lg placeholder:text-muted-foreground max-sm:no-spinner max-sm:text-center sm:w-48"
 				/>
 				<button
+					type="button"
 					onclick={() => {
 						expectedParticipants += 10;
 					}}
 					class="text-base font-semibold text-primary/80 sm:hidden">+10</button
 				>
 				<button
+					type="button"
 					onclick={() => {
 						expectedParticipants += 1;
 					}}
@@ -336,14 +340,14 @@
 					</div>
 				</Popover.Trigger>
 				{#if eventTypes.state === 'success'}
-					<Popover.Content class="p-1" align="start">
+					<Popover.Content class="max-h-60 overflow-auto p-1" align="start">
 						{#each eventTypes.data as eventType}
 							<Popover.Close
 								class={buttonVariants({
 									variant: 'outline',
 									size: 'sm',
 									class: [
-										'flex h-auto w-full flex-col items-start p-2',
+										'flex h-auto w-full flex-col items-start rounded-none p-2 first:rounded-t-sm last:rounded-b-sm',
 										activeEventType?.id === eventType.id ? 'border-primary/20 bg-primary/10' : ''
 									]
 								})}
@@ -405,14 +409,14 @@
 					</div>
 				</Popover.Trigger>
 				{#if eventCategories.state === 'success'}
-					<Popover.Content class="p-1" align="start">
+					<Popover.Content class="max-h-60 overflow-auto p-1" align="start">
 						{#each eventCategories.data as category}
 							<Popover.Close
 								class={buttonVariants({
 									variant: 'outline',
 									size: 'sm',
 									class: [
-										'flex h-auto w-full flex-col items-start p-2',
+										'flex h-auto w-full flex-col items-start rounded-none p-2 first:rounded-t-sm last:rounded-b-sm',
 										activeEventCategory?.id === category.id ? 'border-primary/20 bg-primary/10' : ''
 									]
 								})}

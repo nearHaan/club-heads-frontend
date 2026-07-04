@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { abortEventWorkflow } from '$lib/api/events/workflow-instances';
 	import { Button } from '$lib/components/ui/button';
 	import { formatDate } from '$lib/helpers';
 	import type { LoadedData, WorkflowInstance } from '$lib/types';
@@ -9,6 +10,7 @@
 		CircleSlash,
 		Clock,
 		CopySlash,
+		Loader,
 		LoaderCircle,
 		ReceiptText,
 		Skull,
@@ -50,6 +52,19 @@
 			}
 		}
 	});
+
+	let abortLoading = $state(false);
+	async function abortWorkflow() {
+		if (activeWorkflow.state !== 'success') return;
+		try {
+			abortLoading = true;
+			await abortEventWorkflow(eventId, activeWorkflow.data?.id!);
+		} catch (err: any) {
+			console.error(err.message ?? 'Failed to abort');
+		} finally {
+			abortLoading = false;
+		}
+	}
 </script>
 
 <div class="space-y-2">
@@ -212,8 +227,18 @@
 
 				<div class="flex place-items-center justify-between">
 					{#if activeWorkflow.data.status === 'active'}
-						<Button size="sm" variant="outline" class="text-destructive" onclick={() => {}}>
-							<CircleSlash /> Abort
+						<Button
+							disabled={abortLoading}
+							onclick={abortWorkflow}
+							size="sm"
+							variant="outline"
+							class="text-destructive"
+						>
+							{#if abortLoading}
+								<Loader class="animate-spin" /> Aborting...
+							{:else}
+								<CircleSlash /> Abort
+							{/if}
 						</Button>
 					{/if}
 

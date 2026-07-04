@@ -21,7 +21,7 @@
 				{...props}
 				variant="outline"
 				class={[
-					'w-full justify-between rounded-none border-x border-t-0 border-b text-sm text-sm font-normal shadow-none first:rounded-t-sm first:border-t last:rounded-b-sm sm:w-48',
+					'w-full justify-between rounded-none border-x border-t-0 border-b text-sm font-normal shadow-none first:rounded-t-sm first:border-t last:rounded-b-sm sm:w-48',
 					className
 				]}
 			>

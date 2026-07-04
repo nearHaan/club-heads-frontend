@@ -15,13 +15,15 @@
 	import { loadOrganizerInvitations } from '$lib/api/events/organizer-invitations';
 	import { loadOrgs } from '$lib/api/organizations';
 	import OverviewSection from './overview/overview-section.svelte';
-	import WorkflowsSection from './workflows-section.svelte';
+	import WorkflowsSection from './workflows/workflows-section.svelte';
 	import { loadEventWorkflowsLatest } from '$lib/api/events/workflow-instances';
 	import { submitEvent } from '$lib/api/events/events';
-	import { Ban, CheckCircle, Edit, Loader, Send, XCircle } from '@lucide/svelte';
+	import { CheckCircle, Edit, Loader, XCircle } from '@lucide/svelte';
 	import { eventStatusColors, eventStatusTextColors } from '$lib/constants';
-	import Button from '$lib/components/ui/button/button.svelte';
+	import Button, { buttonVariants } from '$lib/components/ui/button/button.svelte';
 	import { nav } from '../../header.svelte';
+	import EditEventSheet from './edit-event-sheet.svelte';
+	import * as Tooltip from '$lib/components/ui/tooltip/index';
 
 	let event = $state<LoadedData<EventDetail>>({
 		state: 'pending',
@@ -48,8 +50,6 @@
 		message: 'Loading latest workflow...'
 	});
 
-	type TabType = 'overview' | 'organizers' | 'venues' | 'workflows';
-	let activeTab: TabType = $state('overview');
 	let errorText = $state('');
 	let successText = $state('');
 	let submitLoading = $state(false);
@@ -146,9 +146,8 @@
 		loadEventData();
 	});
 
-	function onEnter(id: TabType) {
-		activeTab = id;
-	}
+	let editSheetOpen = $state(false);
+	let editBtnTooltipOpen = $state(false);
 </script>
 
 {#if event.state === 'pending'}
@@ -178,7 +177,25 @@
 					</div>
 					<div class="flex justify-between gap-xs">
 						<h1>{event.data.title}</h1>
-						<Button variant="link">Edit <Edit /></Button>
+						<Tooltip.Provider
+							delayDuration={0}
+							disabled={!(event.state !== 'success' || event.data.status !== 'draft')}
+						>
+							<Tooltip.Root>
+								<Tooltip.Trigger
+									><Button
+										disabled={event.state !== 'success' || event.data.status !== 'draft'}
+										onclick={() => {
+											editSheetOpen = true;
+										}}
+										variant="link">Edit <Edit /></Button
+									></Tooltip.Trigger
+								>
+								<Tooltip.Content>
+									<p>Can Edit only during draft stage</p>
+								</Tooltip.Content>
+							</Tooltip.Root>
+						</Tooltip.Provider>
 					</div>
 				</div>
 				{#if errorText || successText}
@@ -215,13 +232,13 @@
 							{/if}
 							Submit Event
 						</Button>
-					{:else}
-						<Button class="bg-red-300 text-foreground hover:bg-red-500 sm:flex-1">
-							<Ban size="15" /> Abort Workflow
-						</Button>
 					{/if}
 				</div>
 			</div>
 		</div>
 	</div>
+{/if}
+
+{#if event.state === 'success'}
+	<EditEventSheet bind:sheetOpen={editSheetOpen} bind:event={event.data} />
 {/if}
