@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { removeOrganizer } from '$lib/api/events/organizers';
 	import ShapeAvatarSvg from '$lib/components/app/shape-avatar-svg.svelte';
 	import Button, { buttonVariants } from '$lib/components/ui/button/button.svelte';
 	import * as Popover from '$lib/components/ui/popover/index';
@@ -29,27 +28,16 @@
 		eventId: number;
 		eventName: string;
 	} = $props();
-	let errorText = $state('');
-
-	let deletingOrganizerId: null | number = $state(null);
-	async function deleteOrganizer(organizerId: number) {
-		try {
-			deletingOrganizerId = organizerId;
-			await removeOrganizer(eventId, organizerId);
-			organizers = organizers.filter((o) => o.id !== organizerId);
-			organizers = [...organizers];
-		} catch (err: any) {
-			errorText = err.message ?? 'Failed to delete organizer';
-		} finally {
-			deletingOrganizerId = null;
-		}
-	}
 
 	let orgSelectionPopupOpen = $state(false);
 	let orgInviteConfirmPopupOpen = $state(false);
-	let deletePopupOpen = $state(false);
 	let invitationHistoryPopupOpen = $state(false);
-	let deleteInvitationId: null | number = $state(null);
+
+	let deletePopupOpen = $state(false);
+	let deleteOrganizerId: null | number = $state(null);
+	let deleteOrganizerOrInvitation: null | 'organizer' | 'invitation' = $state(null);
+	let organizationToBeDeleted: string | null = $state(null);
+
 	let popupOrgId: number | null = $state(null);
 	let popupRole: EventOrganizerRole | null = $state(null);
 </script>
@@ -135,17 +123,15 @@
 					<Button
 						variant="ghost"
 						size="icon-sm"
-						disabled={deletingOrganizerId === o.id}
-						onclick={async () => {
-							deletingOrganizerId = o.id;
-							await deleteOrganizer(o.id);
+						onclick={() => {
+							popupRole = o.role;
+							organizationToBeDeleted = o.organization.name;
+							deleteOrganizerOrInvitation = 'organizer';
+							deleteOrganizerId = o.id;
+							deletePopupOpen = true;
 						}}
 					>
-						{#if deletingOrganizerId === o.id}
-							<Loader class="animate-spin" />
-						{:else}
-							<X />
-						{/if}
+						<X />
 					</Button>
 				{/if}
 			</div>
@@ -172,7 +158,10 @@
 						variant="ghost"
 						size="icon-sm"
 						onclick={() => {
-							deleteInvitationId = org.id;
+							popupRole = 'co_host';
+							organizationToBeDeleted = org.recipientOrganization.name;
+							deleteOrganizerOrInvitation = 'invitation';
+							deleteOrganizerId = org.id;
 							deletePopupOpen = true;
 						}}
 					>
@@ -215,13 +204,14 @@
 	<OrganizerDeletePopup
 		bind:isOpen={deletePopupOpen}
 		{eventId}
-		invitationId={deleteInvitationId!}
+		itemId={deleteOrganizerId!}
+		type={deleteOrganizerOrInvitation!}
+		role={popupRole!}
 		{eventName}
 		{organizations}
 		bind:organizerInvitations
 		bind:organizers
-		organizationId={popupOrgId!}
-		organizationName={organizations.data.find((o) => o.id === popupOrgId)?.name ?? ''}
+		organizationName={organizationToBeDeleted!}
 	/>
 {/if}
 

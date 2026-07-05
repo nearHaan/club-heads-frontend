@@ -25,6 +25,7 @@
 		X
 	} from '@lucide/svelte';
 	import { slide } from 'svelte/transition';
+	import AbortWorkflowPopup from './abort-workflow-popup.svelte';
 
 	let {
 		eventId,
@@ -87,20 +88,7 @@
 		openActiveStep();
 	});
 
-	let abortLoading = $state(false);
-
-	async function abortWorkflow() {
-		if (activeWorkflow.state !== 'success') return;
-		try {
-			abortLoading = true;
-			await abortEventWorkflow(eventId, activeWorkflow.data?.id!);
-			trigReload = { ...trigReload };
-		} catch (err: any) {
-			console.error(err.message ?? 'Failed to abort');
-		} finally {
-			abortLoading = false;
-		}
-	}
+	let showAbortPopup = $state(false);
 </script>
 
 <div class="space-y-2">
@@ -308,17 +296,14 @@
 				<div class="flex place-items-center justify-between">
 					{#if activeWorkflow.data.status === 'active'}
 						<Button
-							disabled={abortLoading}
-							onclick={abortWorkflow}
+							onclick={() => {
+								showAbortPopup = true;
+							}}
 							size="sm"
 							variant="outline"
 							class="text-destructive"
 						>
-							{#if abortLoading}
-								<Loader class="animate-spin" /> Aborting...
-							{:else}
-								<CircleSlash /> Abort
-							{/if}
+							<CircleSlash /> Abort
 						</Button>
 					{/if}
 
@@ -350,3 +335,12 @@
 		{/if}
 	{/if}
 </div>
+
+{#if activeWorkflow.state === 'success' && showAbortPopup}
+	<AbortWorkflowPopup
+		bind:isOpen={showAbortPopup}
+		{eventId}
+		bind:trigReload
+		workflowId={activeWorkflow.data?.id!}
+	/>
+{/if}

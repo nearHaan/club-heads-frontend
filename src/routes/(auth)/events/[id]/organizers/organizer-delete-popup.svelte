@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { removeOrganizerInvitation } from '$lib/api/events/organizer-invitations';
+	import { removeOrganizer } from '$lib/api/events/organizers';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { authInfo } from '$lib/global/auth.svelte';
@@ -7,6 +8,7 @@
 		type AuthUser,
 		type EventOrganizer,
 		type EventOrganizerInvitation,
+		type EventOrganizerRole,
 		type LoadedData,
 		type Organization
 	} from '$lib/types';
@@ -15,22 +17,24 @@
 	let {
 		isOpen = $bindable(false),
 		eventId,
-		invitationId,
+		itemId,
+		role,
 		eventName,
 		organizations,
+		type,
 		organizers = $bindable(),
 		organizerInvitations = $bindable(),
-		organizationId,
 		organizationName
 	}: {
 		isOpen: boolean;
 		eventId: number;
-		invitationId: number;
+		itemId: number;
+		role: EventOrganizerRole;
 		eventName: string;
+		type: 'organizer' | 'invitation';
 		organizations: LoadedData<Organization[]>;
 		organizers: EventOrganizer[];
 		organizerInvitations: LoadedData<EventOrganizerInvitation[]>;
-		organizationId: number;
 		organizationName: string;
 	} = $props();
 
@@ -47,13 +51,25 @@
 		errorText = '';
 		try {
 			loading = true;
-			const { id } = await removeOrganizerInvitation(eventId, invitationId, selectedUserRoleId);
-			organizerInvitations.data = [
-				...organizerInvitations.data.filter((o) => o.id !== invitationId)
-			];
+			const { id } = await removeOrganizerInvitation(eventId, itemId, selectedUserRoleId);
+			organizerInvitations.data = [...organizerInvitations.data.filter((o) => o.id !== itemId)];
 			isOpen = false;
 		} catch (err: any) {
 			errorText = err.message;
+		} finally {
+			loading = false;
+		}
+	}
+
+	async function deleteOrganizer() {
+		try {
+			loading = true;
+			await removeOrganizer(eventId, itemId);
+			organizers = organizers.filter((o) => o.id !== itemId);
+			organizers = [...organizers];
+			isOpen = false;
+		} catch (err: any) {
+			errorText = err.message ?? 'Failed to delete organizer';
 		} finally {
 			loading = false;
 		}
@@ -96,10 +112,14 @@
 						</select>
 					{/if}</span
 				>
-				of {userOrgName},delete the invitation sent to
-				<span class="font-bold">{organizationName}</span>
-				for the role
-				<span class="font-bold">Co-Host</span>
+				of {userOrgName},{#if type === 'invitation'}
+					delete the invitation sent to
+					<span class="font-bold">{organizationName}</span>
+					for the role
+					<span class="font-bold">Co-Host</span>
+				{:else}
+					remove <span class="font-bold">{organizationName}</span> from the organizers list
+				{/if}
 				for the event
 				<span class="italic">{eventName}</span>
 			</p>
@@ -123,7 +143,13 @@
 				size="sm"
 				variant="destructive"
 				class="flex-1"
-				onclick={deleteInvitation}
+				onclick={() => {
+					if (type === 'invitation') {
+						deleteInvitation();
+					} else if (type === 'organizer') {
+						deleteOrganizer();
+					}
+				}}
 			>
 				{#if loading}<Loader class="animate-spin" />
 				{:else}
@@ -134,56 +160,3 @@
 		</div>
 	</Dialog.Content>
 </Dialog.Root>
-<!-- <Dialog.Root bind:open={isOpen}>
-	<form>
-		<Dialog.Content class="flex flex-col overflow-hidden rounded sm:max-w-xl">
-			<p class="/bg-muted border-b px-3 py-4 text-sm">Delete Invite</p>
-			<div class="flex min-w-60 flex-col gap-2.5 p-3">
-				<p class="text-sm leading-6">
-					I <span
-						>{#if roles.length === 1}
-							<span class="h-8 border border-muted-foreground bg-primary/10 p-0.5 px-xxs"
-								>{roles[0].name}</span
-							>
-						{:else}
-							<select
-								bind:value={selectedUserRoleId}
-								class="h-8 border border-muted-foreground bg-primary/10 p-0.5 px-xxs"
-							>
-								{#each roles as role}
-									<option value={role.id}>{role.name}</option>
-								{/each}
-							</select>
-						{/if}</span
-					>
-					of {userOrgName},delete the invitation sent to
-					<span class="font-bold">{organizationName}</span>
-					for the role
-					<span class="font-bold">Co-Host</span>
-					for the event
-					<span class="italic">{eventName}</span>
-				</p>
-				{#if errorText}
-					<p class="text-xs text-red-500">{errorText}</p>
-				{/if}
-				<div class="flex w-full justify-end gap-2.5 text-sm">
-					<button
-						type="button"
-						onclick={() => {
-							isOpen = false;
-						}}
-						class="px-2 py-2 text-muted-foreground">Go Back</button
-					>
-					<button
-						type="button"
-						onclick={deleteInvitation}
-						disabled={loading}
-						class="flex items-center px-2 py-2 font-bold text-foreground"
-						>{#if loading}<Loader size="15" class="animate-spin" />
-						{/if} Confirm</button
-					>
-				</div>
-			</div>
-		</Dialog.Content>
-	</form>
-</Dialog.Root> -->
