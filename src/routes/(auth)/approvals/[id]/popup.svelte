@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { respondEventAssignments } from '$lib/api/me/approval-assignments';
+	import Button from '$lib/components/ui/button/button.svelte';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import type { EventAssignmentsAndDetails, LoadedData } from '$lib/types';
-	import { ChevronDown, ChevronUp, Loader } from '@lucide/svelte';
+	import { Check, ChevronDown, ChevronUp, Loader, SquareArrowRightExit } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
 
@@ -65,107 +66,115 @@
 
 {#if eventAssignments.state === 'success'}
 	<Dialog.Root bind:open={isOpen}>
-		<form>
-			<Dialog.Content class="overflow-hidden rounded sm:max-w-lg">
-				<p class="border-b px-3 py-4 text-sm">Confirm Approval</p>
-				<div class="flex min-w-60 flex-col gap-2.5 p-3">
-					<p class="text-sm leading-6">
-						I <span class={`${decision === 'approved' ? 'text-green-600' : 'text-red-600'}`}
-							>{decision === 'approved' ? 'approve' : 'deny'}</span
-						>
-						the request to conduct the event "<span class="font-semibold"
-							>{eventAssignments.data.title}</span
-						>" by
-						<span class="font-semibold"
-							>{eventAssignments.data.organizers.find((o) => o.role === 'host')?.organization
-								.name}</span
-						>
-					</p>
-					<button
-						onclick={() => {
-							rolesVisible = !rolesVisible;
-						}}
-						class="flex w-fit cursor-pointer items-center gap-1 text-xs text-muted-foreground hover:underline"
-						>Select roles to approve {#if rolesVisible}
-							<ChevronUp size="10" />
-						{:else}
-							<ChevronDown size="10" />
-						{/if}</button
+		<Dialog.Content class="flex flex-col gap-2.5 overflow-hidden rounded-lg p-3 sm:max-w-lg">
+			<p class="mt-1 text-sm text-muted-foreground">Confirm Approval</p>
+			<div class="flex min-w-60 flex-col gap-2.5 py-2">
+				<p class="text-sm leading-5">
+					I <span class={`${decision === 'approved' ? 'text-green-600' : 'text-red-600'}`}
+						>{decision === 'approved' ? 'approve' : 'deny'}</span
 					>
-					{#if rolesVisible}
-						<div transition:slide class="h-min max-h-50 w-full overflow-auto">
-							<div class="flex flex-col divide-y rounded-lg border">
-								{#each eventAssignments.data.assignments.filter((a) => a.status === 'pending') as assignment}
-									<div
-										class="flex place-items-center justify-between gap-4 py-2 pr-2 pl-3 first:rounded-t-lg last:rounded-b-lg"
-									>
-										<div class="flex place-items-center gap-2.5">
-											<input
-												checked={activeIds.includes(assignment.id)}
-												onchange={(e) => {
-													if (e.currentTarget.checked) {
-														activeIds = [...activeIds, assignment.id];
-													} else {
-														activeIds = activeIds.filter((id) => id !== assignment.id);
-													}
-												}}
-												type="checkbox"
-											/>
-											<div class="text-xs">
-												<p class="font-semibold">{assignment.role.name}</p>
-												<p class="text-muted-foreground">
-													{assignment.role.scope.kindName}
-												</p>
-											</div>
+					the request to conduct the event "<span class="font-semibold"
+						>{eventAssignments.data.title}</span
+					>" by
+					<span class="font-semibold"
+						>{eventAssignments.data.organizers.find((o) => o.role === 'host')?.organization
+							.name}</span
+					>
+				</p>
+				<button
+					onclick={() => {
+						rolesVisible = !rolesVisible;
+					}}
+					class="flex w-fit cursor-pointer items-center gap-1 text-xs text-muted-foreground hover:underline"
+					>Select roles <ChevronUp
+						size="10"
+						class={['transition-all ease-in-out', rolesVisible ? 'rotate-180' : 'rotate-0']}
+					/></button
+				>
+				{#if rolesVisible}
+					<div transition:slide class="h-min max-h-50 w-full overflow-auto">
+						<div class="flex flex-col divide-y rounded-lg border">
+							{#each eventAssignments.data.assignments.filter((a) => a.status === 'pending') as assignment}
+								<div
+									class="flex place-items-center justify-between gap-4 py-2 pr-2 pl-3 first:rounded-t-lg last:rounded-b-lg"
+								>
+									<div class="flex place-items-center gap-2.5">
+										<input
+											checked={activeIds.includes(assignment.id)}
+											onchange={(e) => {
+												if (e.currentTarget.checked) {
+													activeIds = [...activeIds, assignment.id];
+												} else {
+													activeIds = activeIds.filter((id) => id !== assignment.id);
+												}
+											}}
+											type="checkbox"
+										/>
+										<div class="text-xs">
+											<p class="font-semibold">{assignment.role.name}</p>
+											<p class="text-muted-foreground">
+												{assignment.role.scope.kindName}
+											</p>
 										</div>
 									</div>
-								{/each}
-							</div>
+								</div>
+							{/each}
 						</div>
-					{/if}
-					{#if decision === 'approved'}
-						<div class="mt-3 flex items-center gap-1 text-xs text-muted-foreground">
-							<input
-								bind:checked={remarksStateWhenApproved}
-								onclick={(e) => {
-									remarksStateWhenApproved = Boolean(e.currentTarget.checked);
-								}}
-								type="checkbox"
-							/>
-							<p>Add Remarks</p>
-						</div>
-					{/if}
-					{#if (remarksStateWhenApproved && decision === 'approved') || decision === 'denied'}
-						{#if errorText}
-							<p class="text-xs text-red-500">{errorText}</p>
-						{/if}
-						<div transition:slide class="w-full">
-							<p class={`text-xs text-muted-foreground `}>Remarks</p>
-							<textarea
-								bind:value={remarks}
-								class={`min-h-20 w-full overflow-hidden rounded-sm bg-muted p-xxs ${errorText ? 'border border-red-400' : ''}}`}
-							></textarea>
-						</div>
-					{/if}
-					<div class="flex w-full justify-end gap-2.5 text-sm">
-						<button
-							type="button"
-							onclick={() => {
-								isOpen = false;
-							}}
-							class="px-2 py-2 text-muted-foreground">Go Back</button
-						>
-						<button
-							type="button"
-							onclick={respondToRequest}
-							disabled={loading || activeIds.length === 0}
-							class="flex items-center px-2 py-2 font-bold text-foreground disabled:opacity-50"
-							>{#if loading}<Loader size="15" class="animate-spin" />
-							{/if} Confirm</button
-						>
 					</div>
-				</div>
-			</Dialog.Content>
-		</form>
+				{/if}
+				{#if decision === 'approved'}
+					<div class="mt-3 flex items-center gap-1 text-xs text-muted-foreground">
+						<input
+							bind:checked={remarksStateWhenApproved}
+							onclick={(e) => {
+								remarksStateWhenApproved = Boolean(e.currentTarget.checked);
+							}}
+							type="checkbox"
+						/>
+						<p>Add Remarks</p>
+					</div>
+				{/if}
+				{#if (remarksStateWhenApproved && decision === 'approved') || decision === 'denied'}
+					{#if errorText}
+						<p class="text-xs text-red-500">{errorText}</p>
+					{/if}
+					<div transition:slide class="w-full">
+						<p class={`text-xs text-muted-foreground `}>Remarks</p>
+						<textarea
+							bind:value={remarks}
+							class={`min-h-20 w-full overflow-hidden rounded-sm bg-muted p-xxs ${errorText ? 'border border-red-400' : ''}}`}
+						></textarea>
+					</div>
+				{/if}
+				{#if errorText}
+					<p class="text-xs text-red-500">{errorText}</p>
+				{/if}
+			</div>
+			<div class="flex w-full gap-2.5 text-sm sm:flex-row">
+				<Button
+					onclick={() => {
+						isOpen = false;
+					}}
+					size="sm"
+					variant="outline"
+					class={['flex-1', 'bg-background text-foreground']}
+				>
+					<SquareArrowRightExit />Go Back
+				</Button>
+				<Button
+					disabled={loading || activeIds.length === 0}
+					size="sm"
+					variant="default"
+					class="flex-1"
+					onclick={respondToRequest}
+				>
+					{#if loading}<Loader class="animate-spin" />
+					{:else}
+						<Check />
+					{/if}
+					Confirm
+				</Button>
+			</div>
+		</Dialog.Content>
 	</Dialog.Root>
 {/if}

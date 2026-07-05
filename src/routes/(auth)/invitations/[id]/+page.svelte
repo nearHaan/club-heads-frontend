@@ -178,7 +178,7 @@
 				>
 			{:else}
 				<p
-					class={`w-full p-sm text-sm text-muted-foreground ${decisionMade === 'accepted' ? 'bg-green-200 text-foreground' : 'bg-green-200 text-foreground'}`}
+					class={`w-full rounded-sm p-sm text-sm ${decisionMade === 'accepted' ? 'bg-green-600 text-foreground' : 'bg-destructive/80 text-background'}`}
 				>
 					{decisionMade.charAt(0).toUpperCase() + decisionMade.slice(1)} the invitation
 				</p>

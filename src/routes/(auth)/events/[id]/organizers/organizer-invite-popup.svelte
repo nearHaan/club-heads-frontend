@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { addOrganizer } from '$lib/api/events/organizers';
 	import { respondEventAssignments } from '$lib/api/me/approval-assignments';
+	import Button from '$lib/components/ui/button/button.svelte';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { authInfo } from '$lib/global/auth.svelte';
 	import {
@@ -12,7 +13,7 @@
 		type LoadedData,
 		type Organization
 	} from '$lib/types';
-	import { Loader } from '@lucide/svelte';
+	import { Check, Loader, SquareArrowRightExit } from '@lucide/svelte';
 
 	let {
 		isOpen = $bindable(false),
@@ -102,59 +103,63 @@
 </script>
 
 <Dialog.Root bind:open={isOpen}>
-	<form>
-		<Dialog.Content class="flex flex-col overflow-hidden rounded sm:max-w-xl">
-			<p class="/bg-muted border-b px-3 py-4 text-sm">Confirm Invite</p>
-			<div class="flex min-w-60 flex-col gap-2.5 p-3">
-				<p class="text-sm leading-5">
-					I <span
-						>{#if roles.length === 1}
-							<span class="h-8 border border-muted-foreground bg-primary/10 p-0.5 px-xxs"
-								>{roles[0].name}</span
-							>
-						{:else}
-							<select
-								bind:value={selectedUserRoleId}
-								class="h-8 border border-muted-foreground bg-primary/10 p-0.5 px-xxs"
-							>
-								{#each roles as role}
-									<option value={role.id}>{role.name}</option>
-								{/each}
-							</select>
-						{/if}</span
-					>
-					of {userOrgName},invite <span class="font-bold">{organizationName}</span> for the role
-					<span class="font-bold"
-						>{role === 'co_host'
-							? 'Co-Host'
-							: role === 'resource_provider'
-								? 'Resource Provider'
-								: 'Host'}</span
-					>
-					for the event
-					<span class="italic">{eventName}</span>
-				</p>
-				{#if errorText}
-					<p class="text-xs text-red-500">{errorText}</p>
+	<Dialog.Content class="flex flex-col gap-2.5 overflow-hidden rounded-lg p-3 sm:max-w-lg">
+		<p class="mt-1 text-sm text-muted-foreground">Confirm Invite</p>
+		<div class="flex min-w-60 flex-col gap-2.5 py-2">
+			<p class="text-sm leading-5">
+				I <span
+					>{#if roles.length === 1}
+						<span class="h-8 rounded-sm bg-primary/10 p-0.5 px-xxs">{roles[0].name}</span>
+					{:else}
+						<select
+							bind:value={selectedUserRoleId}
+							class="h-8 border border-muted-foreground bg-primary/10 p-0.5 px-xxs"
+						>
+							{#each roles as role}
+								<option value={role.id}>{role.name}</option>
+							{/each}
+						</select>
+					{/if}</span
+				>
+				of {userOrgName},invite <span class="font-bold">{organizationName}</span> for the role
+				<span class="font-bold"
+					>{role === 'co_host'
+						? 'Co-Host'
+						: role === 'resource_provider'
+							? 'Resource Provider'
+							: 'Host'}</span
+				>
+				for the event
+				<span class="italic">{eventName}</span>
+			</p>
+			{#if errorText}
+				<p class="text-xs text-red-500">{errorText}</p>
+			{/if}
+		</div>
+		<div class="flex w-full gap-2.5 text-sm sm:flex-row">
+			<Button
+				onclick={() => {
+					isOpen = false;
+				}}
+				size="sm"
+				variant="outline"
+				class={['flex-1', 'bg-background text-foreground']}
+			>
+				<SquareArrowRightExit />Go Back
+			</Button>
+			<Button
+				disabled={loading}
+				size="sm"
+				variant="default"
+				class="flex-1"
+				onclick={sendInvitation}
+			>
+				{#if loading}<Loader class="animate-spin" />
+				{:else}
+					<Check />
 				{/if}
-				<div class="flex w-full justify-end gap-2.5 text-sm">
-					<button
-						type="button"
-						onclick={() => {
-							isOpen = false;
-						}}
-						class="px-2 py-2 text-muted-foreground">Go Back</button
-					>
-					<button
-						type="button"
-						onclick={sendInvitation}
-						disabled={loading}
-						class="flex items-center px-2 py-2 font-bold text-foreground"
-						>{#if loading}<Loader size="15" class="animate-spin" />
-						{/if} Confirm</button
-					>
-				</div>
-			</div>
-		</Dialog.Content>
-	</form>
+				Confirm
+			</Button>
+		</div>
+	</Dialog.Content>
 </Dialog.Root>

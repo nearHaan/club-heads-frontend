@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { removeOrganizerInvitation } from '$lib/api/events/organizer-invitations';
+	import Button from '$lib/components/ui/button/button.svelte';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { authInfo } from '$lib/global/auth.svelte';
 	import {
 		type AuthUser,
 		type EventOrganizer,
 		type EventOrganizerInvitation,
-		type EventOrganizerRole,
 		type LoadedData,
 		type Organization
 	} from '$lib/types';
-	import { Loader } from '@lucide/svelte';
+	import { Loader, SquareArrowRightExit, X } from '@lucide/svelte';
 
 	let {
 		isOpen = $bindable(false),
@@ -78,6 +78,63 @@
 </script>
 
 <Dialog.Root bind:open={isOpen}>
+	<Dialog.Content class="flex flex-col gap-2.5 overflow-hidden rounded-lg p-3 sm:max-w-lg">
+		<p class="mt-1 text-sm text-muted-foreground">Delete Organizer</p>
+		<div class="flex min-w-60 flex-col gap-2.5 py-2">
+			<p class="text-sm leading-5">
+				I <span
+					>{#if roles.length === 1}
+						<span class="h-8 rounded-sm bg-primary/10 p-0.5 px-xxs">{roles[0].name}</span>
+					{:else}
+						<select
+							bind:value={selectedUserRoleId}
+							class="h-8 border border-muted-foreground bg-primary/10 p-0.5 px-xxs"
+						>
+							{#each roles as role}
+								<option value={role.id}>{role.name}</option>
+							{/each}
+						</select>
+					{/if}</span
+				>
+				of {userOrgName},delete the invitation sent to
+				<span class="font-bold">{organizationName}</span>
+				for the role
+				<span class="font-bold">Co-Host</span>
+				for the event
+				<span class="italic">{eventName}</span>
+			</p>
+			{#if errorText}
+				<p class="text-xs text-red-500">{errorText}</p>
+			{/if}
+		</div>
+		<div class="flex w-full gap-2.5 text-sm sm:flex-row">
+			<Button
+				onclick={() => {
+					isOpen = false;
+				}}
+				size="sm"
+				variant="outline"
+				class={['flex-1', 'bg-background text-foreground']}
+			>
+				<SquareArrowRightExit />Go Back
+			</Button>
+			<Button
+				disabled={loading}
+				size="sm"
+				variant="destructive"
+				class="flex-1"
+				onclick={deleteInvitation}
+			>
+				{#if loading}<Loader class="animate-spin" />
+				{:else}
+					<X />
+				{/if}
+				Delete
+			</Button>
+		</div>
+	</Dialog.Content>
+</Dialog.Root>
+<!-- <Dialog.Root bind:open={isOpen}>
 	<form>
 		<Dialog.Content class="flex flex-col overflow-hidden rounded sm:max-w-xl">
 			<p class="/bg-muted border-b px-3 py-4 text-sm">Delete Invite</p>
@@ -129,4 +186,4 @@
 			</div>
 		</Dialog.Content>
 	</form>
-</Dialog.Root>
+</Dialog.Root> -->
