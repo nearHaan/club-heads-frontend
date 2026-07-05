@@ -2,11 +2,26 @@
 	import { page } from '$app/state';
 	import { loadEventWorkflow, loadEventWorkflows } from '$lib/api/events/workflow-instances';
 	import { workflowStatusColors, workflowStatusTextColors } from '$lib/constants';
-	import { formatDate } from '$lib/helpers';
+	import { formatDate, formatDateDayAndMonthAndYear, formatDateOnlyTime } from '$lib/helpers';
 	import type { LoadedData, WorkflowInstance } from '$lib/types';
-	import { Check, ChevronDown, ChevronUp, X } from '@lucide/svelte';
+	import {
+		Check,
+		ChevronDown,
+		ChevronLast,
+		CircleSlash,
+		Clock,
+		CopySlash,
+		LoaderCircle,
+		PanelTopOpen,
+		Quote,
+		ReceiptText,
+		Skull,
+		X
+	} from '@lucide/svelte';
 	import { slide } from 'svelte/transition';
 	import { nav } from '../../../header.svelte';
+	import { buttonVariants } from '$lib/components/ui/button/button.svelte';
+	import Button from '$lib/components/ui/button/button.svelte';
 
 	let workflows = $state<LoadedData<WorkflowInstance[]>>({
 		state: 'pending',
@@ -21,7 +36,9 @@
 	let activeWorkflowId: number | null = $state(null);
 	let eventId = $derived(Number(page.params.id));
 
-	function isStepPending(step: WorkflowInstance['steps'][0]) {
+	let showFullDetails = $state(false);
+
+	function isStepPendingOrDenied(step: WorkflowInstance['steps'][0]) {
 		return step.roles.some((role) =>
 			role.targetGroups.some((group) =>
 				group.assignments.some(
@@ -30,6 +47,47 @@
 			)
 		);
 	}
+
+	function viewFullDetails() {
+		if (activeWorkflow.state !== 'success') return;
+		if (activeWorkflow.data === null) return;
+		showFullDetails = true;
+		for (const step of activeWorkflow.data.steps) {
+			step.stepOpen = true;
+		}
+	}
+
+	function viewLessDetails() {
+		if (activeWorkflow.state !== 'success') return;
+		if (activeWorkflow.data === null) return;
+		showFullDetails = false;
+		for (const step of activeWorkflow.data.steps) {
+			step.stepOpen = false;
+		}
+		openActiveStep();
+	}
+
+	function openActiveStep() {
+		if (activeWorkflow.state !== 'success') return;
+		if (activeWorkflow.data === null) return;
+
+		let firstPendingFound = false;
+
+		for (const step of activeWorkflow.data.steps) {
+			if (!firstPendingFound && isStepPendingOrDenied(step)) {
+				step.stepOpen = true;
+				firstPendingFound = true;
+			} else {
+				step.stepOpen = false;
+			}
+		}
+	}
+
+	$effect(() => {
+		if (activeWorkflow !== null) {
+			viewFullDetails();
+		}
+	});
 
 	$effect(() => {
 		(async () => {
@@ -40,19 +98,6 @@
 					state: 'success',
 					data: await loadEventWorkflows(eventId)
 				};
-				if (workflows.data.length > 0) {
-					try {
-						activeWorkflow = {
-							state: 'success',
-							data: await loadEventWorkflow(eventId, workflows.data[0].id)
-						};
-					} catch (err: any) {
-						activeWorkflow = {
-							state: 'failed',
-							message: 'Failed to load workflow'
-						};
-					}
-				}
 			} catch (err: any) {
 				workflows = {
 					state: 'failed',
@@ -60,22 +105,6 @@
 				};
 			}
 		})();
-	});
-
-	$effect(() => {
-		if (activeWorkflow.state !== 'success') return;
-		activeWorkflowId = activeWorkflow.data.id;
-
-		let firstPendingFound = false;
-
-		for (const step of activeWorkflow.data.steps) {
-			if (!firstPendingFound && isStepPending(step)) {
-				step.stepOpen = true;
-				firstPendingFound = true;
-			} else {
-				step.stepOpen = false;
-			}
-		}
 	});
 
 	async function loadWorkflow(id: number) {
@@ -95,238 +124,351 @@
 			};
 		}
 	}
+
+	let expandWorkflows = $state(true);
 </script>
 
-<div class="flex w-full max-w-200 flex-col gap-y-sm p-r-pad">
-	{#if workflows.state === 'success'}
-		{#if workflows.data.length > 0}
-			{#if activeWorkflow.state === 'pending'}
-				<p class="italic">Loading workflow...</p>
-			{:else if activeWorkflow.state === 'failed'}
-				<p class="text-red-400 italic">Failed to load workflow</p>
-			{:else if activeWorkflow.state === 'success'}
-				<div class="flex max-w-100 flex-col p-xs">
-					<div class="flex items-start justify-between gap-x-xs">
-						<div class="flex flex-col">
-							<p class="text-2xl italic">WORKFLOW #{activeWorkflowId}</p>
-							<p class="text-xs text-muted-foreground">
-								Created on: {formatDate(activeWorkflow.data.createdAt)}
-							</p>
+<div class="absolute inset-x-0 top-12 bottom-0 mx-auto max-w-prose">
+	<div class="relative flex h-full w-full flex-col gap-y-sm overflow-auto">
+		{#if workflows.state === 'success'}
+			{#if workflows.data.length > 0}
+				<div transition:slide class="flex-1 space-y-sm p-r-pad">
+					{#if activeWorkflow.state === 'pending'}
+						<div class="mb-16 flex w-full animate-pulse flex-col gap-1 p-4">
+							<div class="h-5 w-20 bg-neutral-200/90"></div>
+							<div class="h-2 w-40 bg-neutral-200/80"></div>
+							<div class="mt-8 h-10 w-full bg-neutral-200/80"></div>
+							<div class="h-10 w-full bg-neutral-200/80"></div>
 						</div>
-						<div
-							class={`flex items-center gap-x-xxs px-xs py-px capitalize ${workflowStatusTextColors[activeWorkflow.data.status]}`}
-						>
-							{#if activeWorkflow.data.status === 'completed'}
-								<Check size="15" />
-							{:else if activeWorkflow.data.status === 'aborted' || activeWorkflow.data.status === 'denied'}
-								<X size="15" />
-							{/if}
-							{activeWorkflow.data.status}
-						</div>
-					</div>
-					<div class="mt-5 flex flex-col">
-						{#if activeWorkflow.data.steps !== undefined}
-							{#each activeWorkflow.data.steps as step, index}
-								<div class="flex flex-col">
-									<div class="flex flex-col">
-										{#if index !== 0}
-											<div class="flex w-5 justify-center">
-												<div class="h-3 w-px bg-muted-foreground"></div>
-											</div>
+					{:else if activeWorkflow.state === 'failed'}
+						<p class="mb-16 text-red-400 italic">Failed to load workflow</p>
+					{:else if activeWorkflow.state === 'success'}
+						{#if activeWorkflow.data == null}
+							<div class="mb-16 rounded-lg border p-4 text-center text-xs text-muted-foreground">
+								<p class="font-bold italic">No active workflow.</p>
+								<p class="italic">Submit the event to start a workflow.</p>
+							</div>
+						{:else}
+							<div class="flex place-items-center justify-between">
+								<p class="text-lg font-medium italic">Workflow #{activeWorkflow.data.id}</p>
+								<Button
+									onclick={() => {
+										expandWorkflows = true;
+									}}
+									size="sm"
+									variant="ghost"
+								>
+									<X />
+								</Button>
+							</div>
+							<div class="mb-16 space-y-3 rounded-lg border px-4 py-3">
+								<div>
+									<div class="font-medium">
+										{#if activeWorkflow.data.status === 'active'}
+											Awaiting approval
+										{:else if activeWorkflow.data.status === 'aborted'}
+											Aborted
+										{:else if activeWorkflow.data.status === 'completed'}
+											Completed!
+										{:else if activeWorkflow.data.status === 'denied'}
+											<span class="text-destructive">Request was denied</span>
+										{:else if activeWorkflow.data.status === 'overridden'}
+											Overidden
 										{/if}
-										<div class="flex h-auto items-center">
-											<div class="flex h-5 w-5 flex-col items-center">
-												<div
-													class={`w-px flex-1 bg-muted-foreground
-								${index === 0 ? 'invisible' : ''}`}
-												></div>
-												<div
-													class={`flex h-5 w-5 items-center justify-center rounded-full
-											border border-muted-foreground p-0.5 ${step.status === 'completed' || step.status === 'skipped' ? 'bg-primary text-background' : ''}`}
-												>
-													{#if step.status === 'completed' || step.status === 'skipped'}
-														<Check size="12" />
-													{:else if activeWorkflow.data.status === 'denied' || activeWorkflow.data.status === 'aborted'}
-														<X size="12" />
-													{/if}
-												</div>
-												<div
-													class={`w-px flex-1 bg-muted-foreground
-								${index === activeWorkflow.data.steps.length - 1 ? 'invisible' : ''}`}
-												></div>
-											</div>
-											<div class="ml-sm flex w-full justify-between">
-												<button
-													onclick={() => {
-														step.stepOpen = !step.stepOpen;
-													}}
-													class={`cursor-pointer text-xl leading-none ${
-														step.status === 'pending' ? 'text-muted-foreground' : ''
-													}`}
-												>
-													{step.name}
-												</button>
-												{#if step.roles.some( (s) => s.targetGroups.some((g) => g.assignments.length > 0) )}
-													<button
-														onclick={() => {
-															step.stepOpen = !step.stepOpen;
-														}}
-														>{#if step.stepOpen}
-															<ChevronUp />
-														{:else}
-															<ChevronDown />
-														{/if}</button
-													>
-												{/if}
-											</div>
-										</div>
+									</div>
+									<div class="text-xs text-muted-foreground">
+										{#if activeWorkflow.data.status !== 'active' && activeWorkflow.data.completedAt != null}
+											Completed at {formatDate(activeWorkflow.data.completedAt)}
+										{:else}
+											Started at {formatDate(activeWorkflow.data.createdAt)}
+										{/if}
 									</div>
 								</div>
-								{#if step.stepOpen}
-									<div
-										transition:slide
-										class={`flex ${step.status === 'pending' ? 'text-muted-foreground' : ''}`}
-									>
-										<div class="flex w-5 justify-center">
-											<div class="h-full w-px bg-muted-foreground"></div>
-										</div>
-										<div class="ml-sm flex flex-col gap-y-sm py-sm">
-											{#each step.roles as role}
-												{#each role.targetGroups as group}
-													{#each group.assignments as assignment}
-														<div class="flex items-start leading-none">
-															<div class="flex w-6 justify-start p-px">
-																{#if assignment.status === 'approved' || assignment.status === 'skipped'}
-																	<Check size="15" />
-																{:else if assignment.status === 'denied'}
-																	<X size="15" />
-																{/if}
-															</div>
-															<div class="flex flex-col gap-y-0.5">
-																<p>{assignment.userRole.user.fullName}</p>
-																<p
-																	class={`text-xs uppercase
-														${step.status === 'pending' ? 'text-muted-foreground' : 'text-primary'}`}
-																>
-																	{role.role.name}
-																</p>
-																<p
-																	class={`text-xs ${
-																		assignment.status === 'denied'
-																			? 'text-red-600'
-																			: assignment.status === 'approved'
-																				? 'text-green-600'
-																				: 'text-muted-foreground'
-																	} `}
-																>
-																	{#if assignment.status === 'pending'}
-																		Waiting for approval
-																	{:else}
-																		<span class="capitalize">{assignment.status} the request</span>
-																	{/if}
-																</p>
-															</div>
+
+								<div class="space-y-1">
+									{#each activeWorkflow.data.steps as step}
+										{@const assignments = step.roles.flatMap(({ targetGroups, ...role }) =>
+											targetGroups.flatMap(({ assignments, ...targetGroup }) =>
+												assignments.map((assignment) => ({
+													group: targetGroup,
+													stepRole: role,
+													...assignment
+												}))
+											)
+										)}
+
+										{#if assignments.length > 0}
+											{@const containsRemarks = assignments.some((a) => a.remarks)}
+											<div class="flex gap-2"></div>
+
+											<div>
+												<button
+													class="flex w-full place-items-center gap-2"
+													onclick={() => {
+														if (assignments.length === 0) return;
+														step.stepOpen = !step.stepOpen;
+													}}
+												>
+													<div
+														class={[
+															'aspect-square rounded-full p-1 text-background',
+															step.status === 'completed'
+																? 'bg-emerald-600'
+																: step.status === 'denied' ||
+																	  step.status === 'blocked' ||
+																	  step.status === 'overridden'
+																	? 'bg-red-700'
+																	: step.status === 'skipped'
+																		? 'bg-neutral-300'
+																		: step.status === 'active'
+																			? 'bg-amber-300 text-foreground'
+																			: step.status === 'pending'
+																				? 'bg-background text-foreground'
+																				: 'bg-background text-foreground'
+														]}
+													>
+														{#if step.status === 'completed'}
+															<Check size="12" strokeWidth={3} />
+														{:else if step.status === 'denied'}
+															<X size="12" strokeWidth={3} />
+														{:else if step.status === 'skipped'}
+															<ChevronLast size="12" strokeWidth={3} />
+														{:else if step.status === 'active'}
+															<LoaderCircle class="animate-spin" size="12" strokeWidth={3} />
+														{:else if step.status === 'pending'}
+															<Clock size="12" strokeWidth={3} />
+														{:else if step.status === 'blocked'}
+															<CircleSlash size="12" strokeWidth={3} />
+														{:else if step.status === 'overridden'}
+															<CopySlash size="12" strokeWidth={3} />
+														{:else}
+															<Skull size="12" strokeWidth={3} />
+														{/if}
+													</div>
+
+													<div class={['text-left', containsRemarks ? '' : 'grow']}>
+														{step.name}
+													</div>
+													{#if containsRemarks}
+														<div class="grow">
+															<div
+																class="aspect-square h-1 animate-pulse rounded-full bg-green-700"
+															></div>
 														</div>
-													{/each}
-												{/each}
-											{/each}
-										</div>
-									</div>
-								{/if}
-							{/each}
-						{:else}
-							<p class="italic">Loading steps</p>
+													{/if}
+													{#if assignments.length > 0}
+														<ChevronDown
+															size="16"
+															class={[
+																'transition-all duration-300',
+																step.stepOpen ? 'rotate-180' : 'rotate-0'
+															]}
+														/>
+													{/if}
+												</button>
+
+												{#if assignments.length > 0 && step.stepOpen}
+													<div transition:slide class="mt-1 ml-2 border-l-2 border-dashed pl-5">
+														<div class="divide-y">
+															{#each assignments as assignment}
+																<div class="flex place-items-start justify-between gap-2 py-1">
+																	<div class="w-full">
+																		<div class="flex justify-between gap-2">
+																			<div class="text-sm font-medium">
+																				{assignment.userRole.user.fullName}
+																			</div>
+
+																			<div
+																				class={[
+																					'text-xs',
+																					assignment.status === 'approved'
+																						? 'font-semibold text-emerald-600'
+																						: assignment.status === 'skipped'
+																							? 'text-muted-foreground'
+																							: assignment.status === 'denied'
+																								? 'font-semibold text-red-700'
+																								: assignment.status === 'pending'
+																									? 'text-amber-400'
+																									: ''
+																				]}
+																			>
+																				{assignment.status}
+																			</div>
+																		</div>
+																		<div class="flex flex-col text-xs">
+																			<div class="text-muted-foreground">
+																				{assignment.stepRole.role.name} &middot; {assignment.group
+																					.scope.name}
+																			</div>
+																			{#if assignment.remarks}
+																				<div
+																					transition:slide
+																					class="flex gap-2 text-muted-foreground"
+																				>
+																					<div class="ml-1">
+																						<div class="h-1 border-l border-muted-foreground"></div>
+																						<div
+																							class="h-3 w-2 rounded-bl-sm border-b border-l border-muted-foreground"
+																						></div>
+																					</div>
+																					<div class="flex gap-0.5">
+																						<Quote
+																							class="mt-2 rotate-180 fill-muted-foreground text-transparent"
+																							size={10}
+																						/>
+																						<div class="mt-2 w-fit text-sm text-foreground">
+																							{assignment.remarks}
+																						</div>
+																						<Quote
+																							class="mt-2 fill-muted-foreground text-transparent"
+																							size={10}
+																						/>
+																					</div>
+																				</div>
+																			{/if}
+																			{#if assignment.completedAt && showFullDetails}
+																				<div
+																					transition:slide
+																					class="mt-2 text-[10px] text-muted-foreground/80"
+																				>
+																					{formatDate(assignment.completedAt)}
+																				</div>
+																			{/if}
+																		</div>
+																	</div>
+																</div>
+															{/each}
+														</div>
+													</div>
+												{/if}
+											</div>
+										{/if}
+									{/each}
+								</div>
+								<div class="text-xs text-muted-foreground">
+									Submitted by <span class="text-foreground"
+										>{activeWorkflow.data.submitter.fullName}</span
+									>
+								</div>
+
+								<div class="flex place-items-center justify-end">
+									<Button
+										onclick={() => {
+											if (showFullDetails === true) {
+												viewLessDetails();
+											} else {
+												viewFullDetails();
+											}
+										}}
+										size="sm"
+										variant="ghost"
+										class="ml-auto"
+									>
+										<ReceiptText />
+										{#if showFullDetails}
+											View less
+										{:else}
+											View details
+										{/if}
+									</Button>
+								</div>
+							</div>
 						{/if}
-					</div>
+					{/if}
 				</div>
 			{/if}
 		{/if}
-		<div class="flex flex-col gap-y-xs">
-			<p class="italic">Workflows</p>
-			<div class="hidden sm:block">
-				<table class="w-full max-w-200 border border-muted-foreground text-sm">
-					<thead class="border-b border-muted-foreground text-muted-foreground">
-						<tr class="bg-muted">
-							<th class="p-xs text-left">ID</th>
-							<th class="w-48 p-xs text-left">Status</th>
-							<th class="w-48 p-xs text-left">Created on</th>
-							<th class="w-48 p-xs text-left">Completed on</th>
-						</tr>
-					</thead>
-					<tbody>
-						{#if workflows.data.length === 0}
-							<tr
-								><td class="py-6" colspan="4"
-									><p class="w-full text-center text-muted-foreground italic">
-										No workflows initiated
-									</p></td
-								></tr
-							>
-						{/if}
-						{#each workflows.data as workflow}
-							<tr
-								class={`${workflow.id === activeWorkflowId && workflows.data.length > 1 ? 'bg-primary/5' : ''}`}
-							>
-								<td class="px-xs py-xxs text-left"
-									><button
-										onclick={() => {
-											if (workflow.id === activeWorkflowId) return;
-											loadWorkflow(workflow.id);
-										}}
-										disabled={workflow.id === activeWorkflowId}
-										class="cursor-pointer text-primary underline">#{workflow.id}</button
-									></td
-								>
-								<td class="px-xs py-xxs text-left"
-									><p
-										class={`w-min px-xxs py-0.5 ${workflowStatusColors[workflow.status]} ${workflowStatusTextColors[workflow.status]}`}
-									>
-										{workflow.status}
-									</p></td
-								>
-								<td class="px-xs py-xxs text-left">{formatDate(workflow.createdAt)}</td>
-								<td class="px-xs py-xxs text-left"
-									>{workflow.completedAt ? formatDate(workflow.completedAt) : 'NIL'}</td
-								>
-							</tr>
-						{/each}
-					</tbody>
-				</table>
+	</div>
+	<div
+		class={[
+			'absolute inset-x-0 bottom-0 z-30 mx-auto flex w-full max-w-prose flex-col gap-sm rounded-t-2xl bg-background p-r-pad transition-all duration-700 ease-in-out',
+			expandWorkflows
+				? 'h-full'
+				: 'h-min shadow-[0_-1px_1px_0_rgb(0_0_0/0.1)] duration-50 hover:translate-y-1 hover:scale-98'
+		]}
+	>
+		<button
+			onclick={() => {
+				if (activeWorkflowId === null) return;
+				expandWorkflows = !expandWorkflows;
+			}}
+			class="flex cursor-pointer place-items-center justify-between"
+		>
+			<p class="text-lg font-medium">All Workflows</p>
+			{#if activeWorkflowId !== null}
+				<div
+					class={buttonVariants({
+						variant: 'ghost',
+						size: 'sm',
+						class: ['transition-all', expandWorkflows ? 'rotate-0' : 'rotate-180']
+					})}
+				>
+					<PanelTopOpen />
+				</div>
+			{/if}
+		</button>
+		{#if workflows.state !== 'success'}
+			<div class="flex w-full animate-pulse flex-col gap-y-xs">
+				<div class="h-25 w-full rounded-t-lg bg-neutral-200"></div>
+				<div class="h-25 w-full bg-neutral-200"></div>
+				<div class="h-25 w-full rounded-b-lg bg-neutral-200"></div>
 			</div>
-			<div class="block max-w-200 border border-muted-foreground text-sm sm:hidden">
-				{#if workflows.data.length === 0}
-					<p class="w-full py-6 text-center text-muted-foreground italic">No workflows initiated</p>
-				{/if}
-				{#each workflows.data as workflow}
-					<div
-						class="flex flex-col items-start gap-y-xxs border-b border-muted-foreground bg-muted p-xs last:border-b-0"
-					>
+		{:else if expandWorkflows}
+			<div transition:slide class="flex h-full flex-col gap-sm overflow-auto">
+				<div class="text-sm text-muted-foreground">
+					Select a workflow to view its complete details
+				</div>
+				<div class="no-scrollbar flex h-full flex-col text-sm">
+					{#if workflows.data.length === 0}
+						<div class="rounded-lg border p-4 text-center text-xs text-muted-foreground">
+							<p class="font-bold italic">No active workflow.</p>
+							<p class="italic">Submit the event to start a workflow.</p>
+						</div>
+					{/if}
+					{#each workflows.data as workflow}
 						<button
+							disabled={workflow.id === activeWorkflowId}
 							onclick={() => {
 								if (workflow.id === activeWorkflowId) return;
-								loadWorkflow(workflow.id);
+								expandWorkflows = false;
+								activeWorkflowId = workflow.id;
+								loadWorkflow(activeWorkflowId);
 							}}
-							disabled={workflow.id === activeWorkflowId}
-							class="w-min cursor-pointer text-lg text-primary underline">#{workflow.id}</button
+							class={[
+								'flex cursor-pointer flex-col items-start gap-y-xxs border-x border-b p-xs first:rounded-t-lg first:border-t last:rounded-b-lg',
+								activeWorkflow.state === 'success' && activeWorkflow.data.id === workflow.id
+									? 'bg-primary/10'
+									: ''
+							]}
 						>
-						<p
-							class={`w-min px-xxs py-0.5 ${workflowStatusColors[workflow.status]} ${workflowStatusTextColors[workflow.status]}`}
-						>
-							{workflow.status}
-						</p>
-						<div class="flex flex-col">
-							<p class="text-xs text-muted-foreground">Created on</p>
-							<p class="text-left">{formatDate(workflow.createdAt)}</p>
-						</div>
-						<div class="flex flex-col">
-							<p class="text-xs text-muted-foreground">Completed on</p>
-							<p class="text-left">
-								{workflow.completedAt ? formatDate(workflow.completedAt) : 'NIL'}
-							</p>
-						</div>
-					</div>
-				{/each}
+							<div class="flex w-full items-center justify-between">
+								<p class="w-min text-lg text-primary underline">#{workflow.id}</p>
+								<p class={`w-min ${workflowStatusTextColors[workflow.status]}`}>
+									{workflow.status}
+								</p>
+							</div>
+							<div class="flex w-full justify-between">
+								<div class="flex flex-col items-start">
+									<p class="text-xs text-muted-foreground">Created on</p>
+									<p class="text-left font-semibold">
+										{formatDateDayAndMonthAndYear(workflow.createdAt)}
+									</p>
+									<p class="text-left">{formatDateOnlyTime(workflow.createdAt)}</p>
+								</div>
+								<div class="flex flex-col items-end">
+									<p class="text-xs text-muted-foreground">Completed on</p>
+									{#if workflow.completedAt}
+										<p class="text-left font-semibold">
+											{formatDateDayAndMonthAndYear(workflow.completedAt)}
+										</p>
+										<p class="text-left">{formatDateOnlyTime(workflow.completedAt)}</p>
+									{/if}
+								</div>
+							</div>
+						</button>
+					{/each}
+				</div>
 			</div>
-		</div>
-	{/if}
+		{/if}
+	</div>
 </div>
