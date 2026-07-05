@@ -53,9 +53,9 @@
 			if (role === 'resource_provider') {
 				const organization = organizations.data.find((o) => o.id === organizationId)!;
 				organizers.push({
-					id: id,
-					organization: organizations.data.find((o) => o.id === organizationId)!,
-					role: role
+					id,
+					organization,
+					role
 				});
 				organizers = [...organizers];
 			} else if (role === 'co_host') {
