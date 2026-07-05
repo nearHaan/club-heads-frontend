@@ -51,12 +51,13 @@
 			loading = true;
 			const { id } = await addOrganizer(eventId, selectedUserRoleId, organizationId, role);
 			if (role === 'resource_provider') {
+				const organization = organizations.data.find((o) => o.id === organizationId)!;
 				organizers.push({
 					id: id,
 					organization: organizations.data.find((o) => o.id === organizationId)!,
 					role: role
 				});
-				organizers = { ...organizers };
+				organizers = [...organizers];
 			} else if (role === 'co_host') {
 				organizerInvitations.data = [
 					{
