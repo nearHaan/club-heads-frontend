@@ -14,6 +14,7 @@
 	import Badge from '$lib/components/ui/badge/badge.svelte';
 	import ShapeAvatarSvg from '$lib/components/app/shape-avatar-svg.svelte';
 	import TreeTable from '$lib/components/app/tree-table.svelte';
+	import DataTableActions from '$lib/components/app/data-table-actions.svelte';
 	import { authInfo } from '$lib/global/auth.svelte';
 	import { slide } from 'svelte/transition';
 	import { untrack } from 'svelte';
@@ -204,7 +205,7 @@
 			<Button
 				variant="outline"
 				size="icon"
-				class="relative size-8 p-0"
+				class="relative hidden size-8 p-0 md:inline-flex"
 				onclick={() => {
 					treeMode = !treeMode;
 				}}
@@ -220,11 +221,21 @@
 
 			{#if canCreateOrg}
 				<Button
+					size="icon"
+					class="relative size-8 p-0 md:hidden"
 					onclick={() => {
 						addSheetOpen = true;
 					}}
 				>
-					<Plus /> Add<span class="hidden md:inline">&nbsp;Organization</span>
+					<Plus />
+				</Button>
+				<Button
+					class="hidden md:inline-flex"
+					onclick={() => {
+						addSheetOpen = true;
+					}}
+				>
+					<Plus /> Add Organization
 				</Button>
 			{/if}
 		</div>
@@ -280,7 +291,44 @@
 				{actions}
 				actionPrefix={pencilSlot}
 				itemLabel="organizations"
-			/>
+			>
+				{#snippet mobileRow(org: Organization, _depth: number)}
+					<div
+						class="flex cursor-pointer items-center gap-3 p-3 transition-colors hover:bg-accent/50"
+						onclick={() => goto(`/organizations/${org.id}`)}
+						role="button"
+						tabindex={0}
+						onkeydown={(e) => {
+							if (e.key === 'Enter' || e.key === ' ') goto(`/organizations/${org.id}`);
+						}}
+					>
+						<ShapeAvatarSvg seed={org.name} size={40} class="rounded-xs" />
+						<div class="flex min-w-0 flex-1 flex-col truncate">
+							{#if org.parentOrganizationId && orgNameMap.has(org.parentOrganizationId)}
+								<span class="truncate text-[10px] text-muted-foreground leading-tight"
+									>{orgNameMap.get(org.parentOrganizationId)}</span
+								>
+							{/if}
+							<span class="truncate text-sm font-medium leading-tight mt-1 mb-0.5">{org.name}</span>
+							<div class="mt-1">
+								<Badge variant="outline" class="bg-foreground/10 text-foreground border-transparent text-[10px] font-normal leading-none"
+									>{orgTypeMap.get(org.organizationTypeId) ?? '—'}</Badge
+								>
+							</div>
+						</div>
+						<div class="flex shrink-0 items-center gap-2 justify-end" onclick={(e) => e.stopPropagation()} role="presentation">
+							{#if canCreateOrg}
+								<button
+									class="text-muted-foreground hover:text-foreground"
+								>
+									<Pencil size={14} />
+								</button>
+							{/if}
+							<DataTableActions selectedItem={org} {actions} />
+						</div>
+					</div>
+				{/snippet}
+			</TreeTable>
 		{:else}
 			<p>Failed to load organizations</p>
 		{/if}

@@ -52,7 +52,7 @@
 	);
 </script>
 
-<div class="overflow-x-auto border bg-background bg-clip-border">
+<div class="overflow-x-auto rounded-sm border bg-background bg-clip-border">
 	<div class="relative w-full">
 		<table class="w-full text-sm">
 			<thead class="border-b bg-primary/5">
@@ -68,7 +68,7 @@
 						</th>
 					{/if}
 					{#each columns as column, i (i)}
-						<th class="px-xs py-xxs text-start font-normal">
+						<th class="px-xs py-xxs text-start text-xs font-normal">
 							{column.header ?? ''}
 						</th>
 					{/each}

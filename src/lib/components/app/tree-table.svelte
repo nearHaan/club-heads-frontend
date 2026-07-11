@@ -19,7 +19,8 @@
 		visibleItemIds = null,
 		emptyMessage = 'No results.',
 		itemLabel = 'items',
-		treeMode = true
+		treeMode = true,
+		mobileRow = undefined
 	}: {
 		items: T[];
 		columns: TreeTableColumn<T>[];
@@ -31,6 +32,7 @@
 		emptyMessage?: string;
 		itemLabel?: string;
 		treeMode?: boolean;
+		mobileRow?: import('svelte').Snippet<[T, number]>;
 	} = $props();
 
 	type TreeNode<T> = {
@@ -115,22 +117,22 @@
 										{#if d === node.depth}
 											{#if node.children.length > 0}
 												<div
-													class="absolute z-0 w-[2px] bg-border pointer-events-none"
+													class="pointer-events-none absolute z-0 w-[2px] bg-border"
 													style={`top: 50%; bottom: 0; left: ${d * 1.5 + 1.75}rem;`}
 												></div>
 											{/if}
 										{:else if d === node.depth - 1}
 											<div
-												class="absolute top-0 z-0 w-[2px] bg-border pointer-events-none"
+												class="pointer-events-none absolute top-0 z-0 w-[2px] bg-border"
 												style={`left: ${d * 1.5 + 1.75}rem; height: ${node.isLast[node.depth] ? '50%' : '100%'};`}
 											></div>
 											<div
-												class="absolute z-0 h-[2px] bg-border pointer-events-none"
+												class="pointer-events-none absolute z-0 h-[2px] bg-border"
 												style={`top: 50%; left: ${d * 1.5 + 1.75}rem; width: 0.75rem;`}
 											></div>
 										{:else if !node.isLast[d + 1]}
 											<div
-												class="absolute top-0 z-0 h-full w-[2px] bg-border pointer-events-none"
+												class="pointer-events-none absolute top-0 z-0 h-full w-[2px] bg-border"
 												style={`left: ${d * 1.5 + 1.75}rem;`}
 											></div>
 										{/if}
@@ -177,29 +179,41 @@
 </div>
 
 <div class="flex flex-col md:hidden">
-	{#each flatNodes as node (node.item.id)}
-		<div class="relative py-1">
+	{#if mobileRow}
+		<div class="flex flex-col rounded-sm border bg-background">
+			{#if flatNodes.length === 0}
+				<div class="p-4 text-center text-sm text-muted-foreground">{emptyMessage}</div>
+			{/if}
+			{#each flatNodes as node (node.item.id)}
+				<div class="relative border-b last:border-0 hover:bg-accent/50">
+					{@render mobileRow(node.item, node.depth)}
+				</div>
+			{/each}
+		</div>
+	{:else}
+		{#each flatNodes as node (node.item.id)}
+			<div class="relative py-1">
 			{#if treeMode}
 				{#each Array.from({ length: node.depth + 1 }) as _, d}
 					{#if d === node.depth}
 						{#if node.children.length > 0}
 							<div
-								class="absolute z-0 w-[2px] bg-border pointer-events-none"
+								class="pointer-events-none absolute z-0 w-[2px] bg-border"
 								style={`top: 50%; bottom: 0; left: ${d * 1.5 + 0.75}rem;`}
 							></div>
 						{/if}
 					{:else if d === node.depth - 1}
 						<div
-							class="absolute top-0 z-0 w-[2px] bg-border pointer-events-none"
+							class="pointer-events-none absolute top-0 z-0 w-[2px] bg-border"
 							style={`left: ${d * 1.5 + 0.75}rem; height: ${node.isLast[node.depth] ? '50%' : '100%'};`}
 						></div>
 						<div
-							class="absolute z-0 h-[2px] bg-border pointer-events-none"
+							class="pointer-events-none absolute z-0 h-[2px] bg-border"
 							style={`top: 50%; left: ${d * 1.5 + 0.75}rem; width: 0.75rem;`}
 						></div>
 					{:else if !node.isLast[d + 1]}
 						<div
-							class="absolute top-0 z-0 h-full w-[2px] bg-border pointer-events-none"
+							class="pointer-events-none absolute top-0 z-0 h-full w-[2px] bg-border"
 							style={`left: ${d * 1.5 + 0.75}rem;`}
 						></div>
 					{/if}
@@ -293,5 +307,6 @@
 		<div class="py-lg rounded-sm border px-xs text-center text-sm text-muted-foreground">
 			{emptyMessage}
 		</div>
+	{/if}
 	{/if}
 </div>

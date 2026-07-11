@@ -1,17 +1,17 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import Separator from '$lib/components/ui/separator/separator.svelte';
-	import type { LoadedData, Organization, EntityMember, Role, TableProps, User } from '$lib/types';
+	import type { LoadedData, Organization, EntityMember, Role, ActionMenuItem } from '$lib/types';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { getOrgById, loadOrganizationMembers, loadRolesOrgType } from '$lib/api/organizations';
-	import DataTable from '$lib/components/app/data-table.svelte';
+	import DataTableActions from '$lib/components/app/data-table-actions.svelte';
 	import AddMember from './add-member.svelte';
 	import { permissionGrantedSomewhere } from '$lib/helpers';
 	import { nav } from '../../header.svelte';
+	import SearchInput from '$lib/components/app/search-input.svelte';
+	import ShapeAvatarSvg from '$lib/components/app/shape-avatar-svg.svelte';
 
 	let addSheetOpen = $state(false);
-
-	let title = $state('Loading...');
+	let searchValue = $state('');
 
 	let org = $state<LoadedData<Organization>>({
 		state: 'pending',
@@ -28,43 +28,22 @@
 		message: 'Loading roles...'
 	});
 
-	let columns: TableProps<EntityMember>['columns'] = [
-		{
-			key: 'fullName',
-			header: 'Name',
-			type: 'button',
-			onclick: (row) => {
-				selectedMember = row;
-				addSheetOpen = true;
-			}
-		},
-		{
-			key: 'email',
-			header: 'Email',
-			type: 'text'
-		},
-		{
-			key: 'roles',
-			header: 'Role(s)',
-			type: 'transformValue',
-			transformValue: (member) => {
-				if (roles.state === 'pending') {
-					return 'Loading';
-				} else if (roles.state === 'success') {
-					return member.roles.reduce((acc: string, role, i) => {
-						if (roles.state === 'success') {
-							const name = roles.data.find((_role) => _role.id === role.roleId)?.name ?? '';
-							return acc ? acc + ', ' + name : acc + name;
-						}
-						return acc;
-					}, '');
+	function getRolesText(member: EntityMember) {
+		if (roles.state === 'pending') {
+			return 'Loading';
+		} else if (roles.state === 'success') {
+			return member.roles.reduce((acc: string, role, i) => {
+				if (roles.state === 'success') {
+					const name = roles.data.find((_role) => _role.id === role.roleId)?.name ?? '';
+					return acc ? acc + ', ' + name : acc + name;
 				}
-				return 'undefined';
-			}
+				return acc;
+			}, '');
 		}
-	];
+		return 'undefined';
+	}
 
-	const optionsList: TableProps<EntityMember>['optionsList'] = [
+	const optionsList: ActionMenuItem<EntityMember>[] = [
 		{
 			id: 1,
 			name: 'Edit Role(s)',
@@ -78,6 +57,17 @@
 	let selectedMember: null | EntityMember = $state(null);
 	let organizationId = $derived(Number(page.params.id!));
 
+	let filteredMembers = $derived.by<EntityMember[]>(() => {
+		if (orgMembers.state !== 'success') return [];
+		if (!searchValue) return orgMembers.data;
+		const lower = searchValue.toLowerCase().trim();
+		return orgMembers.data.filter(
+			(member) =>
+				member.fullName.toLowerCase().includes(lower) ||
+				member.email?.toLowerCase().includes(lower)
+		);
+	});
+
 	$effect(() => {
 		nav.set([{ title: 'Organizations', url: '/organizations' }]);
 
@@ -87,13 +77,10 @@
 					state: 'success',
 					data: await getOrgById(organizationId)
 				};
-				nav.set([
-					{ title: 'Organizations', url: '/organizations' },
-					{ title: org.data.name, url: `/organizations/${org.data.id}` }
-				]);
-
-				title = org.data.name;
-				console.log(org.data);
+			nav.set([
+				{ title: 'Organizations', url: '/organizations' },
+				{ title: org.data.name, url: `/organizations/${org.data.id}` }
+			]);
 			} catch (err) {
 				org = {
 					state: 'failed',
@@ -105,7 +92,6 @@
 					state: 'success',
 					data: await loadOrganizationMembers(organizationId)
 				};
-				console.log(orgMembers.data);
 			} catch (err) {
 				orgMembers = {
 					state: 'failed',
@@ -118,7 +104,6 @@
 						state: 'success',
 						data: await loadRolesOrgType(org.data.organizationTypeId)
 					};
-					console.log(roles.data);
 				}
 			} catch (err) {
 				roles = {
@@ -132,30 +117,63 @@
 	let canAddMember = $derived(permissionGrantedSomewhere('organization:add_member'));
 </script>
 
-<div class="relative mx-auto flex max-w-prose">
-	<div class="flex w-full flex-col gap-y-xs p-r-pad">
-		<div class="flex items-center">
-			<h2 class="text-lg">{title}</h2>
-		</div>
-		<Separator />
-		{#if canAddMember}
-			<div class="flex w-full justify-end gap-x-xxs">
-				<Button variant="default" onclick={() => (addSheetOpen = true)}>Manage Members</Button>
-			</div>
-		{/if}
+<div class="mx-auto flex w-full max-w-prose flex-col">
+	<div class="sticky top-12 z-40 flex gap-xs bg-background p-3">
+		<div class="flex w-full place-items-center gap-2">
+			<SearchInput bind:value={searchValue} placeholder="Search members..." />
 
-		<Separator />
-		<div class="overflow-auto">
-			{#if orgMembers.state === 'pending'}
-				{console.log('waiting...')}
-				<p>{orgMembers.message}</p>
-			{:else if orgMembers.state === 'success'}
-				{console.log('hi: ', orgMembers.data)}
-				<DataTable {columns} data={orgMembers.data} {optionsList} />
-			{:else}
-				<p>{orgMembers.message}</p>
+			{#if canAddMember}
+				<Button onclick={() => (addSheetOpen = true)}>Manage Members</Button>
 			{/if}
 		</div>
+	</div>
+
+	<div class="flex flex-col gap-y-4 p-r-pad">
+		{#if orgMembers.state === 'pending'}
+			<div class="grid animate-pulse gap-2">
+				{#each Array.from({ length: 5 }) as _}
+					<div class="h-10 animate-pulse rounded-sm border bg-neutral-200/80"></div>
+				{/each}
+			</div>
+		{:else if orgMembers.state === 'success'}
+			<div class="flex flex-col rounded-sm border bg-background">
+				{#each filteredMembers as member, index (member.id ?? index)}
+					<!-- svelte-ignore a11y_click_events_have_key_events -->
+					<!-- svelte-ignore a11y_no_static_element_interactions -->
+					<div
+						class="flex cursor-pointer items-center gap-3 border-b p-3 last:border-0 hover:bg-accent/50"
+						onclick={() => {
+							selectedMember = member;
+							addSheetOpen = true;
+						}}
+					>
+						<ShapeAvatarSvg
+							seed={member.fullName}
+							size={32}
+							class="rounded-xs"
+							styleName="thumb"
+						/>
+						<div class="flex min-w-0 flex-1 flex-col">
+							<span class="text-sm font-medium">{member.fullName}</span>
+							{#if member.email}
+								<span class="truncate text-xs text-muted-foreground">{member.email}</span>
+							{/if}
+							<span class="truncate text-xs text-muted-foreground">{getRolesText(member)}</span>
+						</div>
+						{#if canAddMember}
+							<div class="flex items-center justify-end" onclick={(e) => e.stopPropagation()}>
+								<DataTableActions selectedItem={member} actions={optionsList} />
+							</div>
+						{/if}
+					</div>
+				{/each}
+				{#if filteredMembers.length === 0}
+					<div class="p-4 text-center text-sm text-muted-foreground">No members found.</div>
+				{/if}
+			</div>
+		{:else}
+			<p>{orgMembers.message}</p>
+		{/if}
 	</div>
 </div>
 
