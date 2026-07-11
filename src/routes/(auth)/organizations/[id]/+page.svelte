@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { UserPlus } from '@lucide/svelte';
 	import type { LoadedData, Organization, EntityMember, Role, ActionMenuItem } from '$lib/types';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { getOrgById, loadOrganizationMembers, loadRolesOrgType } from '$lib/api/organizations';
@@ -123,7 +124,10 @@
 			<SearchInput bind:value={searchValue} placeholder="Search members..." />
 
 			{#if canAddMember}
-				<Button onclick={() => (addSheetOpen = true)}>Manage Members</Button>
+				<Button class="hidden md:inline-flex" onclick={() => (addSheetOpen = true)}>Manage Members</Button>
+				<Button class="md:hidden" size="icon" onclick={() => (addSheetOpen = true)}>
+					<UserPlus />
+				</Button>
 			{/if}
 		</div>
 	</div>
