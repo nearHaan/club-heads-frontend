@@ -64,8 +64,7 @@
 		const lower = searchValue.toLowerCase().trim();
 		return orgMembers.data.filter(
 			(member) =>
-				member.fullName.toLowerCase().includes(lower) ||
-				member.email?.toLowerCase().includes(lower)
+				member.fullName.toLowerCase().includes(lower) || member.email?.toLowerCase().includes(lower)
 		);
 	});
 
@@ -78,10 +77,10 @@
 					state: 'success',
 					data: await getOrgById(organizationId)
 				};
-			nav.set([
-				{ title: 'Organizations', url: '/organizations' },
-				{ title: org.data.name, url: `/organizations/${org.data.id}` }
-			]);
+				nav.set([
+					{ title: 'Organizations', url: '/organizations' },
+					{ title: org.data.name, url: `/organizations/${org.data.id}` }
+				]);
 			} catch (err) {
 				org = {
 					state: 'failed',
@@ -124,7 +123,9 @@
 			<SearchInput bind:value={searchValue} placeholder="Search members..." />
 
 			{#if canAddMember}
-				<Button class="hidden md:inline-flex" onclick={() => (addSheetOpen = true)}>Manage Members</Button>
+				<Button class="hidden md:inline-flex" onclick={() => (addSheetOpen = true)}
+					>Manage Members</Button
+				>
 				<Button class="md:hidden" size="icon" onclick={() => (addSheetOpen = true)}>
 					<UserPlus />
 				</Button>
@@ -134,11 +135,7 @@
 
 	<div class="flex flex-col gap-y-4 p-r-pad">
 		{#if orgMembers.state === 'pending'}
-			<div class="grid animate-pulse gap-2">
-				{#each Array.from({ length: 5 }) as _}
-					<div class="h-10 animate-pulse rounded-sm border bg-neutral-200/80"></div>
-				{/each}
-			</div>
+			<p class="p-4 text-center text-sm text-muted-foreground">{orgMembers.message}</p>
 		{:else if orgMembers.state === 'success'}
 			<div class="flex flex-col rounded-sm border bg-background">
 				{#each filteredMembers as member, index (member.id ?? index)}
@@ -154,8 +151,8 @@
 						<ShapeAvatarSvg
 							seed={member.fullName}
 							size={32}
+							styleName={'thumb'}
 							class="rounded-xs"
-							styleName="thumb"
 						/>
 						<div class="flex min-w-0 flex-1 flex-col">
 							<span class="text-sm font-medium">{member.fullName}</span>

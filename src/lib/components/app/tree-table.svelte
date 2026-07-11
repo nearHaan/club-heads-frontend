@@ -12,7 +12,7 @@
 	let {
 		items,
 		columns,
-		getParentId,
+		getParentId = undefined,
 		onRowClick,
 		actions,
 		actionPrefix,
@@ -24,7 +24,7 @@
 	}: {
 		items: T[];
 		columns: TreeTableColumn<T>[];
-		getParentId: (item: T) => number | null;
+		getParentId?: (item: T) => number | null;
 		onRowClick?: (item: T) => void;
 		actions?: ActionMenuItem<T>[];
 		actionPrefix?: Snippet<[T]>;
@@ -43,6 +43,15 @@
 	};
 
 	let tree = $derived.by<TreeNode<T>[]>(() => {
+		if (!getParentId || !treeMode) {
+			return items.map((item, index) => ({
+				item,
+				children: [],
+				depth: 0,
+				isLast: [index === items.length - 1]
+			}));
+		}
+
 		const childrenMap = new Map<number | null, T[]>();
 		const itemSet = new Set(items.map((item) => item.id));
 
