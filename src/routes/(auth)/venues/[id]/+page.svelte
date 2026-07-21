@@ -15,8 +15,6 @@
 	let addSheetOpen = $state(false);
 	let searchValue = $state('');
 
-	let title = $state('Loading...');
-
 	let venue = $state<LoadedData<Venue>>({
 		state: 'pending',
 		message: 'Loading venue details...'
@@ -36,12 +34,10 @@
 		if (roles.state === 'pending') {
 			return 'Loading';
 		} else if (roles.state === 'success') {
+			const rolesData = roles.data;
 			return member.roles.reduce((acc: string, role, i) => {
-				if (roles.state === 'success') {
-					const name = roles.data.find((_role) => _role.id === role.roleId)?.name ?? '';
-					return acc ? acc + ', ' + name : acc + name;
-				}
-				return acc;
+				const name = rolesData.find((_role) => _role.id === role.roleId)?.name ?? '';
+				return acc ? acc + ', ' + name : acc + name;
 			}, '');
 		}
 		return 'undefined';
@@ -84,7 +80,6 @@
 					{ title: 'Venues', url: '/venues' },
 					{ title: venue.data.name, url: `/venues/${venue.data.id}` }
 				]);
-				title = venue.data.name;
 			} catch (err) {
 				venue = {
 					state: 'failed',
@@ -102,17 +97,22 @@
 					message: 'Failed to load members'
 				};
 			}
-			try {
-				if (venue.state === 'success') {
+			if (venue.state === 'success') {
+				try {
 					roles = {
 						state: 'success',
 						data: await loadRolesVenueType(venue.data.venueTypeId)
 					};
+				} catch (err) {
+					roles = {
+						state: 'failed',
+						message: 'Failed to load roles'
+					};
 				}
-			} catch (err) {
+			} else {
 				roles = {
 					state: 'failed',
-					message: 'Failed to load roles'
+					message: 'Roles unavailable'
 				};
 			}
 		})();
@@ -121,16 +121,27 @@
 	let canAddMember = $derived(permissionGrantedSomewhere('venue:add_member'));
 </script>
 
-<div class="mx-auto flex w-full max-w-prose flex-col pb-16">
+<div class="mx-auto w-full max-w-prose pb-16">
 	<div class="sticky top-12 z-40 flex gap-xs bg-background p-3">
 		<div class="flex w-full place-items-center gap-2">
 			<SearchInput bind:value={searchValue} placeholder="Search members..." />
 
 			{#if canAddMember}
-				<Button class="hidden md:inline-flex" onclick={() => (addSheetOpen = true)}
-					>Manage Members</Button
+				<Button
+					class="hidden md:inline-flex"
+					onclick={() => {
+						selectedMember = null;
+						addSheetOpen = true;
+					}}>Manage Members</Button
 				>
-				<Button class="md:hidden" size="icon" onclick={() => (addSheetOpen = true)}>
+				<Button
+					class="md:hidden"
+					size="icon"
+					onclick={() => {
+						selectedMember = null;
+						addSheetOpen = true;
+					}}
+				>
 					<UserPlus />
 				</Button>
 			{/if}
@@ -141,7 +152,7 @@
 		{#if venueMembers.state === 'pending'}
 			<p class="p-4 text-center text-sm text-muted-foreground">{venueMembers.message}</p>
 		{:else if venueMembers.state === 'success'}
-			<div class="flex flex-col rounded-sm border bg-background">
+			<div class="rounded-sm border bg-background">
 				{#each filteredMembers as member, index (member.id ?? index)}
 					<!-- svelte-ignore a11y_click_events_have_key_events -->
 					<!-- svelte-ignore a11y_no_static_element_interactions -->

@@ -141,21 +141,21 @@
 				state: 'success',
 				data: await loadOrgs()
 			};
-			try {
-				orgTypes = {
-					state: 'success',
-					data: await loadOrgTypes()
-				};
-			} catch (error) {
-				orgTypes = {
-					state: 'failed',
-					message: 'Failed to load organization types'
-				};
-			}
 		} catch (error) {
 			fetchedOrgs = {
 				state: 'failed',
 				message: 'Failed to load organizations'
+			};
+		}
+		try {
+			orgTypes = {
+				state: 'success',
+				data: await loadOrgTypes()
+			};
+		} catch (error) {
+			orgTypes = {
+				state: 'failed',
+				message: 'Failed to load organization types'
 			};
 		}
 	});
@@ -164,7 +164,7 @@
 	let canCreateOrg = $derived(permissionGrantedSomewhere('organization:create'));
 </script>
 
-<div class="mx-auto flex w-full max-w-prose flex-col">
+<div class="mx-auto w-full max-w-prose">
 	<div class="sticky top-12 z-40 flex gap-xs bg-background p-3">
 		<div class="flex w-full place-items-center gap-2">
 			{#if orgTypes.state === 'success'}
@@ -254,7 +254,6 @@
 					<div class="mb-2 text-xs text-muted-foreground uppercase">My Organization</div>
 					<a
 						href="/organizations/{myOrganization.id}"
-						data-sveltekit-reload
 						class="flex items-center gap-3 rounded-sm border p-3 transition-colors hover:bg-accent"
 					>
 						<ShapeAvatarSvg seed={myOrganization.name} size={32} class="rounded-xs" />
@@ -338,11 +337,7 @@
 {#snippet nameCol(org: Organization, _depth: number)}
 	<div class="flex items-center gap-2">
 		<ShapeAvatarSvg seed={org.name} size={24} class="rounded-xs" />
-		<a
-			href="/organizations/{org.id}"
-			class="font-medium hover:underline"
-			onclick={(e) => e.stopPropagation()}>{org.name}</a
-		>
+		<span class="font-medium hover:underline">{org.name}</span>
 	</div>
 {/snippet}
 

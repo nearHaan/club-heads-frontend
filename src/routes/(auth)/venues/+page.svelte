@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Funnel, Plus } from '@lucide/svelte';
-	import type { LoadedData, TableProps, Venue, VenueType } from '$lib/types';
+	import type { ActionMenuItem, LoadedData, TableProps, Venue, VenueType } from '$lib/types';
 	import { loadVenues } from '$lib/api/venue.js';
 	import { loadVenueTypes } from '$lib/api/venue-types.js';
 	import { onMount } from 'svelte';
@@ -64,7 +64,9 @@
 		await refreshVenues();
 	});
 
-	let actions: TableProps<Venue>['optionsList'] = [
+	let canModifyFacilities = $derived(permissionGrantedSomewhere('venue:modify_facilities'));
+
+	let actions = $derived.by<ActionMenuItem<Venue>[]>(() => [
 		{
 			id: 1,
 			name: 'View Details',
@@ -72,15 +74,19 @@
 				goto(`/venues/${venue.id}`);
 			}
 		},
-		{
-			id: 2,
-			name: 'Manage Facilities',
-			onclick: (venue) => {
-				activeVenueId = venue.id;
-				facilitiesSheetOpen = true;
-			}
-		}
-	];
+		...(canModifyFacilities
+			? [
+					{
+						id: 2,
+						name: 'Manage Facilities',
+						onclick: (venue: Venue) => {
+							activeVenueId = venue.id;
+							facilitiesSheetOpen = true;
+						}
+					}
+				]
+			: [])
+	]);
 
 	let canCreateVenue = $derived(permissionGrantedSomewhere('venue:create'));
 
@@ -94,7 +100,7 @@
 	});
 </script>
 
-<div class="mx-auto flex w-full max-w-prose flex-col pb-16">
+<div class="mx-auto w-full max-w-prose pb-16">
 	<!-- Toolbar -->
 	<div class="sticky top-12 z-40 flex gap-xs bg-background p-3">
 		<div class="flex w-full place-items-center gap-2">
@@ -226,11 +232,7 @@
 {#snippet nameCol(venue: Venue, _depth: number)}
 	<div class="flex items-center gap-2">
 		<ShapeAvatarSvg seed={venue.name} size={24} class="rounded-xs" />
-		<a
-			href="/venues/{venue.id}"
-			class="font-medium hover:underline"
-			onclick={(e) => e.stopPropagation()}>{venue.name}
-		</a>
+		<span class="font-medium hover:underline">{venue.name}</span>
 	</div>
 {/snippet}
 

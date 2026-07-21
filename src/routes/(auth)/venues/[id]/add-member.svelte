@@ -138,6 +138,8 @@
 		if (member) {
 			emailValue = member.email;
 			loadRoles();
+		} else {
+			clearUser();
 		}
 	});
 </script>
@@ -210,9 +212,7 @@
 										>
 									</div>
 								{/each}
-								<!-- {#if userRoles.data.length === 0}
-							<p class="p-xs text-sm">No Roles.</p>
-						{/if} -->
+
 								<div class="flex">
 									<SelectButton
 										name="role"

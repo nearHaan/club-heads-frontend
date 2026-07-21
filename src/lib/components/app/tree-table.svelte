@@ -113,7 +113,7 @@
 			<tbody>
 				{#each flatNodes as node, i (node.item.id)}
 					<tr
-						class={['border-b last:border-0 hover:bg-accent', onRowClick ? 'cursor-pointer' : '']}
+						class={[!treeMode ? 'border-b' : '', 'last:border-0 hover:bg-accent', onRowClick ? 'cursor-pointer' : '']}
 						onclick={() => onRowClick?.(node.item)}
 					>
 						{#each columns as column, colIdx (colIdx)}
@@ -153,7 +153,7 @@
 							</td>
 						{/each}
 						{#if (actions && actions.length > 0) || actionPrefix}
-							<td class="w-0 border-b px-xs py-xxs text-end" onclick={(e) => e.stopPropagation()}>
+							<td class={['w-0 px-xs py-xxs text-end', !treeMode ? 'border-b' : '']} onclick={(e) => e.stopPropagation()}>
 								<div class="flex items-center justify-end gap-2">
 									{#if actionPrefix}
 										{@render actionPrefix(node.item)}
@@ -187,9 +187,9 @@
 	{/if}
 </div>
 
-<div class="flex flex-col md:hidden">
+<div class="md:hidden">
 	{#if mobileRow}
-		<div class="flex flex-col rounded-sm border bg-background">
+		<div class="rounded-sm border bg-background">
 			{#if flatNodes.length === 0}
 				<div class="p-4 text-center text-sm text-muted-foreground">{emptyMessage}</div>
 			{/if}
