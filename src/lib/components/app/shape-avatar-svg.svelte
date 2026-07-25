@@ -2,7 +2,7 @@
 	import { Style, Avatar } from '@dicebear/core';
 	import shapeGrid from '@dicebear/styles/shape-grid.json' with { type: 'json' };
 	import thumbs from '@dicebear/styles/thumbs.json' with { type: 'json' };
-	import clsx from 'clsx';
+
 	import type { ClassValue } from 'svelte/elements';
 
 	let {
