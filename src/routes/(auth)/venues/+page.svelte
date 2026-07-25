@@ -9,13 +9,13 @@
 	import VenueFacilitiesSheet from './venue-facilities-sheet.svelte';
 	import { goto } from '$app/navigation';
 	import TreeTable from '$lib/components/app/tree-table.svelte';
-	import ShapeAvatarSvg from '$lib/components/app/shape-avatar-svg.svelte';
 	import Badge from '$lib/components/ui/badge/badge.svelte';
 	import SearchInput from '$lib/components/app/search-input.svelte';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import { permissionGrantedSomewhere } from '$lib/helpers';
 	import { nav } from '../header.svelte';
 	import DataTableActions from '$lib/components/app/data-table-actions.svelte';
+	import { authInfo } from '$lib/global/auth.svelte';
 
 	let venues = $state<LoadedData<Venue[]>>({
 		state: 'pending',
@@ -90,9 +90,22 @@
 
 	let canCreateVenue = $derived(permissionGrantedSomewhere('venue:create'));
 
+	let myVenues = $derived.by<{ id: number; name: string; typeName: string }[]>(() => {
+		const user = authInfo.get();
+		if (!user || user.type === 'admin') return [];
+		const venueMemberships = user.memberships.filter((m: any) => m.type === 'venue');
+		return venueMemberships.map((m: any) => ({
+			id: m.id,
+			name: m.name,
+			typeName: m.kind.name
+		}));
+	});
+
 	let filteredVenues = $derived.by(() => {
 		if (venues.state !== 'success') return [];
+		const myVenueIds = new Set(myVenues.map((v) => v.id));
 		return venues.data.filter((venue) => {
+			if (myVenueIds.has(venue.id)) return false;
 			const matchesSearch = venue.name.toLowerCase().includes(searchValue.toLowerCase());
 			const matchesFilter = typeFilterId ? venue.venueTypeId === typeFilterId : true;
 			return matchesSearch && matchesFilter;
@@ -163,57 +176,77 @@
 		{#if venues.state === 'pending'}
 			<p class="p-4 text-center">Loading venues...</p>
 		{:else if venues.state === 'success'}
-			<TreeTable
-				items={filteredVenues}
-				treeMode={false}
-				columns={[
-					{
-						header: 'Name',
-						render: nameCol
-					},
-					{
-						header: 'Max Capacity',
-						render: capacityCol
-					},
-					{
-						header: 'Type',
-						render: typeCol
-					}
-				]}
-				onRowClick={(venue) => {
-					goto(`/venues/${venue.id}`);
-				}}
-				{actions}
-				itemLabel="venues"
-			>
-				{#snippet mobileRow(venue: Venue, _depth: number)}
-					<div
-						class="flex cursor-pointer items-center gap-3 p-3 transition-colors hover:bg-accent/50"
-						onclick={() => goto(`/venues/${venue.id}`)}
-						role="button"
-						tabindex={0}
-						onkeydown={(e) => {
-							if (e.key === 'Enter' || e.key === ' ') goto(`/venues/${venue.id}`);
-						}}
-					>
-						<ShapeAvatarSvg seed={venue.name} size={40} class="rounded-xs" />
-						<div class="flex min-w-0 flex-1 flex-col truncate">
-							<span class="truncate text-[10px] text-muted-foreground leading-tight">
-								Capacity: {venue.maxCapacity}
-							</span>
-							<span class="truncate mt-1 text-sm font-medium leading-tight mb-0.5">{venue.name}</span>
-							<div class="mt-1">
-								<Badge variant="outline" class="bg-foreground/10 text-foreground hover:bg-foreground/15 border-transparent text-[10px] font-normal leading-none"
-									>{venueTypesMap.get(venue.venueTypeId) ?? '—'}</Badge
+			<div class="flex flex-col gap-y-4">
+				{#if myVenues.length > 0}
+					<div>
+						<div class="mb-2 text-xs text-muted-foreground uppercase">My Venues</div>
+						<div class="flex flex-col gap-2">
+							{#each myVenues as venue}
+								<a
+									href="/venues/{venue.id}"
+									class="flex items-center gap-3 rounded-sm border p-3 transition-colors hover:bg-accent"
 								>
-							</div>
-						</div>
-						<div class="flex shrink-0 items-center gap-2 justify-end" onclick={(e) => e.stopPropagation()} role="presentation">
-							<DataTableActions selectedItem={venue} {actions} />
+									<div class="flex flex-col">
+										<span class="font-medium">{venue.name}</span>
+										<span class="text-xs text-muted-foreground">{venue.typeName}</span>
+									</div>
+								</a>
+							{/each}
 						</div>
 					</div>
-				{/snippet}
-			</TreeTable>
+				{/if}
+
+				<TreeTable
+					items={filteredVenues}
+					treeMode={false}
+					columns={[
+						{
+							header: 'Name',
+							render: nameCol
+						},
+						{
+							header: 'Max Capacity',
+							render: capacityCol
+						},
+						{
+							header: 'Type',
+							render: typeCol
+						}
+					]}
+					onRowClick={(venue) => {
+						goto(`/venues/${venue.id}`);
+					}}
+					{actions}
+					itemLabel="venues"
+				>
+					{#snippet mobileRow(venue: Venue, _depth: number)}
+						<div
+							class="flex cursor-pointer items-center gap-3 p-3 transition-colors hover:bg-accent/50"
+							onclick={() => goto(`/venues/${venue.id}`)}
+							role="button"
+							tabindex={0}
+							onkeydown={(e) => {
+								if (e.key === 'Enter' || e.key === ' ') goto(`/venues/${venue.id}`);
+							}}
+						>
+							<div class="flex min-w-0 flex-1 flex-col truncate">
+								<span class="truncate mt-0.5 text-sm font-medium leading-tight mb-1">{venue.name}</span>
+								<div class="mb-1.5 flex flex-wrap gap-1.5">
+									<Badge variant="outline" class="bg-foreground/10 text-foreground hover:bg-foreground/15 border-transparent text-[10px] font-normal leading-none"
+										>{venueTypesMap.get(venue.venueTypeId) ?? '—'}</Badge
+									>
+								</div>
+								<span class="truncate text-[10px] text-muted-foreground leading-tight">
+									Capacity: {venue.maxCapacity}
+								</span>
+							</div>
+							<div class="flex shrink-0 items-center gap-2 justify-end" onclick={(e) => e.stopPropagation()} role="presentation">
+								<DataTableActions selectedItem={venue} {actions} />
+							</div>
+						</div>
+					{/snippet}
+				</TreeTable>
+			</div>
 		{:else}
 			<p class="p-4 text-center text-red-500">{venues.message}</p>
 		{/if}
@@ -231,7 +264,6 @@
 
 {#snippet nameCol(venue: Venue, _depth: number)}
 	<div class="flex items-center gap-2">
-		<ShapeAvatarSvg seed={venue.name} size={24} class="rounded-xs" />
 		<span class="font-medium hover:underline">{venue.name}</span>
 	</div>
 {/snippet}

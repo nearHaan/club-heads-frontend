@@ -54,30 +54,31 @@
 		return new Map(fetchedOrgs.data.map((o) => [o.id, o.name]));
 	});
 
-	let myOrganization = $derived.by<{ id: number; name: string; typeName: string } | null>(() => {
+	let myOrganizations = $derived.by<{ id: number; name: string; typeName: string }[]>(() => {
 		const user = authInfo.get();
-		if (!user || user.type === 'admin') return null;
-		const orgMembership = user.memberships.find((m) => m.type === 'organization');
-		if (!orgMembership) return null;
-		return {
-			id: orgMembership.id,
-			name: orgMembership.name,
-			typeName: orgMembership.kind.name
-		};
+		if (!user || user.type === 'admin') return [];
+		const orgMemberships = user.memberships.filter((m) => m.type === 'organization');
+		return orgMemberships.map((m) => ({
+			id: m.id,
+			name: m.name,
+			typeName: m.kind.name
+		}));
 	});
 
 	let treeOrgs = $derived.by<Organization[]>(() => {
 		if (fetchedOrgs.state !== 'success') return [];
-		if (!myOrganization) return fetchedOrgs.data;
-		return fetchedOrgs.data.filter((o) => o.id !== myOrganization!.id);
+		if (myOrganizations.length === 0) return fetchedOrgs.data;
+		const myOrgIds = new Set(myOrganizations.map((o) => o.id));
+		return fetchedOrgs.data.filter((o) => !myOrgIds.has(o.id));
 	});
 
 	let matchCounts = $derived.by<Record<number, number>>(() => {
 		if (fetchedOrgs.state !== 'success') return {};
 		const search = searchValue.toLowerCase().trim();
 		const counts: Record<number, number> = {};
+		const myOrgIds = new Set(myOrganizations.map((o) => o.id));
 		for (const o of fetchedOrgs.data) {
-			if (myOrganization && o.id === myOrganization.id) continue;
+			if (myOrgIds.has(o.id)) continue;
 			if (!search || o.name.toLowerCase().includes(search)) {
 				counts[o.organizationTypeId] = (counts[o.organizationTypeId] || 0) + 1;
 			}
@@ -95,10 +96,11 @@
 
 		const matches = new Set<number>();
 		const parentMap = new Map<number, number | null>();
+		const myOrgIds = new Set(myOrganizations.map((o) => o.id));
 
 		for (const o of fetchedOrgs.data) {
 			parentMap.set(o.id, o.parentOrganizationId);
-			if (myOrganization && o.id === myOrganization.id) continue;
+			if (myOrgIds.has(o.id)) continue;
 
 			let match = true;
 			if (search) match = o.name.toLowerCase().includes(search);
@@ -249,19 +251,23 @@
 				{/each}
 			</div>
 		{:else if fetchedOrgs.state === 'success'}
-			{#if myOrganization}
+			{#if myOrganizations.length > 0}
 				<div>
-					<div class="mb-2 text-xs text-muted-foreground uppercase">My Organization</div>
-					<a
-						href="/organizations/{myOrganization.id}"
-						class="flex items-center gap-3 rounded-sm border p-3 transition-colors hover:bg-accent"
-					>
-						<ShapeAvatarSvg seed={myOrganization.name} size={32} class="rounded-xs" />
-						<div class="flex flex-col">
-							<span class="font-medium">{myOrganization.name}</span>
-							<span class="text-xs text-muted-foreground">{myOrganization.typeName}</span>
-						</div>
-					</a>
+					<div class="mb-2 text-xs text-muted-foreground uppercase">My Organizations</div>
+					<div class="flex flex-col gap-2">
+						{#each myOrganizations as org}
+							<a
+								href="/organizations/{org.id}"
+								class="flex items-center gap-3 rounded-sm border p-3 transition-colors hover:bg-accent"
+							>
+								<ShapeAvatarSvg seed={org.name} size={32} class="rounded-xs" />
+								<div class="flex flex-col">
+									<span class="font-medium">{org.name}</span>
+									<span class="text-xs text-muted-foreground">{org.typeName}</span>
+								</div>
+							</a>
+						{/each}
+					</div>
 				</div>
 			{/if}
 

@@ -5,8 +5,6 @@
 
 	import type { ClassValue } from 'svelte/elements';
 
-	const avatarCache = new Map<string, string>();
-
 	let {
 		seed,
 		size = 35,
@@ -16,18 +14,13 @@
 
 	const style = $derived(new Style(styleName === 'shape' ? shapeGrid : thumbs));
 
-	const avatar = $derived.by(() => {
-		const cacheKey = `${styleName}:${seed}:${size}`;
-		const cached = avatarCache.get(cacheKey);
-		if (cached) return cached;
-		const result = new Avatar(style, {
+	const avatar = $derived(
+		new Avatar(style, {
 			seed,
 			size: size,
 			borderRadius: styleName === 'shape' ? 0 : 50
-		}).toDataUri();
-		avatarCache.set(cacheKey, result);
-		return result;
-	});
+		}).toDataUri()
+	);
 </script>
 
 <img src={avatar} alt="Avatar" class={className} />
