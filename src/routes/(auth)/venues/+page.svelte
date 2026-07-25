@@ -8,7 +8,6 @@
 	import AddVenue from './add-venue.svelte';
 	import VenueFacilitiesSheet from './venue-facilities-sheet.svelte';
 	import { goto } from '$app/navigation';
-	import TreeTable from '$lib/components/app/tree-table.svelte';
 	import Badge from '$lib/components/ui/badge/badge.svelte';
 	import SearchInput from '$lib/components/app/search-input.svelte';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
@@ -16,6 +15,7 @@
 	import { nav } from '../header.svelte';
 	import DataTableActions from '$lib/components/app/data-table-actions.svelte';
 	import { authInfo } from '$lib/global/auth.svelte';
+	import TreeTable from '$lib/components/app/tree-table.svelte';
 
 	let venues = $state<LoadedData<Venue[]>>({
 		state: 'pending',
@@ -23,7 +23,7 @@
 	});
 
 	let venueTypesMap = new Map<number, string>();
-	
+
 	let addVenueSheetOpen = $state(false);
 	let facilitiesSheetOpen = $state(false);
 	let activeVenueId: null | number = $state(null);
@@ -51,14 +51,14 @@
 
 	onMount(async () => {
 		nav.set([{ title: 'Venues', url: '/venues' }]);
-		
+
 		try {
 			const types = await loadVenueTypes();
 			for (const type of types) {
 				venueTypesMap.set(type.id, type.name);
 			}
 		} catch (e) {
-			console.error("Failed to load venue types", e);
+			console.error('Failed to load venue types', e);
 		}
 
 		await refreshVenues();
@@ -138,7 +138,7 @@
 							<div class="flex w-full items-center justify-between gap-2">
 								<span class="text-sm font-medium">{name}</span>
 								{#if typeFilterId === id}
-									<div class="size-1.5 rounded-full bg-primary h-1.5 w-1.5"></div>
+									<div class="size-1.5 h-1.5 w-1.5 rounded-full bg-primary"></div>
 								{/if}
 							</div>
 						</DropdownMenu.Item>
@@ -180,11 +180,11 @@
 				{#if myVenues.length > 0}
 					<div>
 						<div class="mb-2 text-xs text-muted-foreground uppercase">My Venues</div>
-						<div class="flex flex-col gap-2">
+						<div class="flex flex-col">
 							{#each myVenues as venue}
 								<a
 									href="/venues/{venue.id}"
-									class="flex items-center gap-3 rounded-sm border p-3 transition-colors hover:bg-accent"
+									class="flex items-center gap-3 border-x border-b p-3 transition-colors first:rounded-t-sm first:border-t last:rounded-b-sm hover:bg-accent"
 								>
 									<div class="flex flex-col">
 										<span class="font-medium">{venue.name}</span>
@@ -213,7 +213,7 @@
 							render: typeCol
 						}
 					]}
-					onRowClick={(venue) => {
+					onRowClick={(venue: Venue) => {
 						goto(`/venues/${venue.id}`);
 					}}
 					{actions}
@@ -230,17 +230,25 @@
 							}}
 						>
 							<div class="flex min-w-0 flex-1 flex-col truncate">
-								<span class="truncate mt-0.5 text-sm font-medium leading-tight mb-1">{venue.name}</span>
+								<span class="mt-0.5 mb-1 truncate text-sm leading-tight font-medium"
+									>{venue.name}</span
+								>
 								<div class="mb-1.5 flex flex-wrap gap-1.5">
-									<Badge variant="outline" class="bg-foreground/10 text-foreground hover:bg-foreground/15 border-transparent text-[10px] font-normal leading-none"
+									<Badge
+										variant="outline"
+										class="border-transparent bg-foreground/10 text-[10px] leading-none font-normal text-foreground hover:bg-foreground/15"
 										>{venueTypesMap.get(venue.venueTypeId) ?? '—'}</Badge
 									>
 								</div>
-								<span class="truncate text-[10px] text-muted-foreground leading-tight">
+								<span class="truncate text-[10px] leading-tight text-muted-foreground">
 									Capacity: {venue.maxCapacity}
 								</span>
 							</div>
-							<div class="flex shrink-0 items-center gap-2 justify-end" onclick={(e) => e.stopPropagation()} role="presentation">
+							<div
+								class="flex shrink-0 items-center justify-end gap-2"
+								onclick={(e) => e.stopPropagation()}
+								role="presentation"
+							>
 								<DataTableActions selectedItem={venue} {actions} />
 							</div>
 						</div>
@@ -273,8 +281,7 @@
 {/snippet}
 
 {#snippet typeCol(venue: Venue, _depth: number)}
-	<Badge variant="outline" class="bg-foreground/5 text-muted-foreground border-transparent">
+	<Badge variant="outline" class="border-transparent bg-foreground/5 text-muted-foreground">
 		{venueTypesMap.get(venue.venueTypeId) ?? '—'}
 	</Badge>
 {/snippet}
-

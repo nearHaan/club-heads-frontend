@@ -254,11 +254,11 @@
 			{#if myOrganizations.length > 0}
 				<div>
 					<div class="mb-2 text-xs text-muted-foreground uppercase">My Organizations</div>
-					<div class="flex flex-col gap-2">
+					<div class="flex flex-col">
 						{#each myOrganizations as org}
 							<a
 								href="/organizations/{org.id}"
-								class="flex items-center gap-3 rounded-sm border p-3 transition-colors hover:bg-accent"
+								class="flex items-center gap-3 border-x border-b p-3 transition-colors first:rounded-t-sm first:border-t last:rounded-b-sm hover:bg-accent"
 							>
 								<ShapeAvatarSvg seed={org.name} size={32} class="rounded-xs" />
 								<div class="flex flex-col">
@@ -310,22 +310,26 @@
 						<ShapeAvatarSvg seed={org.name} size={40} class="rounded-xs" />
 						<div class="flex min-w-0 flex-1 flex-col truncate">
 							{#if org.parentOrganizationId && orgNameMap.has(org.parentOrganizationId)}
-								<span class="truncate text-[10px] text-muted-foreground leading-tight"
+								<span class="truncate text-[10px] leading-tight text-muted-foreground"
 									>{orgNameMap.get(org.parentOrganizationId)}</span
 								>
 							{/if}
-							<span class="truncate text-sm font-medium leading-tight mt-1 mb-0.5">{org.name}</span>
+							<span class="mt-1 mb-0.5 truncate text-sm leading-tight font-medium">{org.name}</span>
 							<div class="mt-1">
-								<Badge variant="outline" class="bg-foreground/10 text-foreground border-transparent text-[10px] font-normal leading-none"
+								<Badge
+									variant="outline"
+									class="border-transparent bg-foreground/10 text-[10px] leading-none font-normal text-foreground"
 									>{orgTypeMap.get(org.organizationTypeId) ?? '—'}</Badge
 								>
 							</div>
 						</div>
-						<div class="flex shrink-0 items-center gap-2 justify-end" onclick={(e) => e.stopPropagation()} role="presentation">
+						<div
+							class="flex shrink-0 items-center justify-end gap-2"
+							onclick={(e) => e.stopPropagation()}
+							role="presentation"
+						>
 							{#if canCreateOrg}
-								<button
-									class="text-muted-foreground hover:text-foreground"
-								>
+								<button class="text-muted-foreground hover:text-foreground">
 									<Pencil size={14} />
 								</button>
 							{/if}
