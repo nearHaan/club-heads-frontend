@@ -72,6 +72,65 @@ export type WorkflowInstance = {
 	}[];
 };
 
+export type CalculatedCalendarDayEvent = {
+	id: number;
+	title: string;
+	status: 'draft' | 'pending' | 'approved' | 'cancelled' | 'overridden';
+	startsAt: string;
+	endsAt: string;
+	parentEvent: {
+		id: number;
+		title: string;
+	} | null;
+	hostOrganization: {
+		id: number;
+		name: string;
+		type: {
+			id: number;
+			name: string;
+		};
+	};
+	category: {
+		id: number;
+		name: string;
+	};
+	timings: {
+		startsAt: string;
+		endsAt: string;
+	};
+	venueAllotments: {
+		id: number;
+		venue: {
+			id: number;
+			name: string;
+			type: {
+				id: number;
+				name: string;
+			};
+		};
+		startsAt: string;
+		endsAt: string;
+		timings: {
+			startsAt: string;
+			endsAt: string;
+		};
+	}[];
+	allVenueAllotments: {
+		id: number;
+		venue: {
+			id: number;
+			name: string;
+		};
+		startsAt: string;
+		endsAt: string;
+	}[];
+};
+
+export type CalendarEventsAndDate = {
+	utcDate: string;
+	events: CalculatedCalendarDayEvent[];
+};
+
 export const ENTITIES = ['organization', 'venue'] as const;
 export type EntityType = (typeof ENTITIES)[number];
 

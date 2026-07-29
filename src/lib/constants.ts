@@ -33,7 +33,17 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionCode[]> = {
 		'event:view_all_confirmed',
 		'event:view_all_non_draft',
 		'event:view_own'
-	]
+	],
+	'/venues': ['venue:add_member', 'venue:create', 'venue:modify_facilities'],
+	'/organizations': ['organization:add_member', 'organization:create'],
+	'/upcoming': [
+		'event:allot_venue',
+		'event:manage',
+		'event:view_all',
+		'event:view_all_confirmed',
+		'event:view_all_non_draft',
+		'event:view_own'
+	] // change later
 } as const;
 
 export const eventStatusColors: Record<Event['status'], string> = {
@@ -130,3 +140,18 @@ export const workflowStepAssignmentStatusTextColors: Record<
 	pending: 'text-blue-700',
 	skipped: 'text-neutral-700'
 };
+
+export const MONTHS_SHORT = [
+	'Jan',
+	'Feb',
+	'Mar',
+	'Apr',
+	'May',
+	'Jun',
+	'Jul',
+	'Aug',
+	'Sep',
+	'Oct',
+	'Nov',
+	'Dec'
+];
