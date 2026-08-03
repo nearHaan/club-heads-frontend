@@ -57,6 +57,11 @@
 						icon: Home
 					},
 					{
+						title: 'Event Calendar',
+						url: '/event-calendar',
+						icon: CircleCheck
+					},
+					{
 						title: 'Approvals',
 						url: '/approvals',
 						icon: CircleCheck
