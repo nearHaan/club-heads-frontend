@@ -152,33 +152,41 @@
 </script>
 
 <div class="flex w-full max-w-200 flex-col gap-y-sm p-r-pad">
-	<h2 class="text-lg">Organization Types</h2>
+	<h3>Organization Types</h3>
 	<p class="text-sm text-muted-foreground">
 		Manage children and roles associated with each organization type here. Select an item to manage
 		its entities
 	</p>
-	<div class=" border border-muted-foreground bg-muted">
+	<div class="">
 		{#if orgTypes.state === 'pending'}
-			<p class="p-xs">{orgTypes.message}</p>
+			<div class="rounded-sm flex flex-col gap-0.5 animate-pulse">
+			<div class="h-9 w-full bg-muted rounded-t-sm"></div>
+			<div class="h-9 w-full bg-muted"></div>
+			<div class="h-9 w-full bg-muted"></div>
+			<div class="h-9 w-full bg-muted rounded-b-sm"></div>
+			</div>
 		{:else if orgTypes.state === 'success'}
 			{#each orgTypes.data as org}
-				<Button
+				<button
 					onclick={async () => {
 						activeOrgTpe = org;
 						setActiveTab(orgTypeActiveTab);
 					}}
-					class="w-full justify-start rounded-none border-b border-b-muted-foreground text-sm text-secondary-foreground"
-					variant="link">{org.name}</Button
+					class={["flex w-full cursor-pointer justify-start border-x border-b border-foreground px-sm py-xs text-sm first:rounded-t-sm first:border-t last:rounded-b-sm last:border-b hover:bg-muted hover:underline", activeOrgTpe?.id == org.id ? 'bg-primary/10 text-primary hover:bg-primary/20' : '']}
+					>{org.name}</button
 				>
 			{/each}
-			<div class="flex w-full items-center p-xxs max-sm:flex-col">
-				<Input
+			<div
+				class="flex w-full border-x border-b border-foreground p-xs text-sm first:rounded-t-sm first:border-t last:rounded-b-sm last:border-b max-sm:flex-col"
+			>
+				<input
 					bind:value={newOrgTypeValue}
 					onchange={(e) => {
 						newOrgTypeValue = e.currentTarget.value;
 					}}
 					name="orgName"
-					class="w-full rounded-none border-secondary-foreground"
+					placeholder="New Organization type"
+					class="w-full rounded bg-muted p-xs"
 					type="text"
 				/>
 				<Button onclick={onSave} variant="link"><PlusIcon /> Add</Button>
@@ -188,8 +196,8 @@
 		{/if}
 	</div>
 	{#if activeOrgTpe !== null}
-		<div class="border border-muted-foreground bg-muted">
-			<h3 class="text- p-xs font-medium">{activeOrgTpe?.name}</h3>
+		<div class="rounded-sm border border-foreground">
+			<h3 class="p-xs font-medium">{activeOrgTpe?.name}</h3>
 			<div class="flex gap-x-xxs">
 				<TabButton
 					onclick={setActiveTab}
@@ -209,7 +217,6 @@
 						{@const selectItems = orgTypes.data
 							.filter(
 								(item) =>
-									item.id !== activeOrgTpe?.id &&
 									orgTypeChildren.state === 'success' &&
 									orgTypeChildren.data.findIndex((child) => child.id === item.id) === -1
 							)
@@ -220,24 +227,22 @@
 								variant="link">{child.name}</Button
 							>
 						{/each}
-						<div class="flex">
+						<div class="flex w-full p-xs text-sm max-sm:flex-col">
 							<SelectButton
 								name="Organization"
-								class="w-full"
+								class="w-full rounded border-0 bg-muted p-xs"
 								bind:value={activeOrgTpe.selectedChildId!}
 								itemsList={selectItems}
 								optionName="label"
 								optionValue="value"
 							/>
 							<Button
-								variant="link"
 								onclick={() => {
 									onChildAdd(activeOrgTpe!.id, activeOrgTpe!.selectedChildId!);
 								}}
-								class="rounded-none"><PlusIcon />Add</Button
+								variant="link"><PlusIcon /> Add</Button
 							>
 						</div>
-						<!-- <Button variant="link"><PlusIcon /> Add new Child</Button> -->
 					{:else if orgTypeChildren.state === 'failed'}
 						<p class="p-xs">Failed to Load: {orgTypeChildren.message}</p>
 					{/if}
@@ -261,19 +266,19 @@
 								<Button class="text-red-400" size="icon" variant="ghost"><TrashIcon /></Button>
 							</div>
 						{/each}
-						<div class="flex w-full items-center p-xxs max-sm:flex-col">
-							<Input
+						<div class="flex w-full p-xs text-sm max-sm:flex-col">
+							<input
 								bind:value={newRoleValue}
 								onchange={(e) => {
 									newRoleValue = e.currentTarget.value;
 								}}
 								name="orgName"
-								class="w-full max-w-100 rounded-none border-secondary-foreground "
+								placeholder="New Role"
+								class="w-full rounded bg-muted p-xs"
 								type="text"
 							/>
 							<Button onclick={onRoleSave} variant="link"><PlusIcon /> Add</Button>
 						</div>
-						<!-- <Button variant="link"><PlusIcon /> Add</Button> -->
 					{:else}
 						<p class="p-xs">Failed to Load: {orgTypeRoles.message}</p>
 					{/if}

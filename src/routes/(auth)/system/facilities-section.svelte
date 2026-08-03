@@ -52,27 +52,35 @@
 </script>
 
 <div class="flex w-full max-w-200 flex-col gap-y-sm p-r-pad">
-	<h2 class="text-lg">Facilities</h2>
+	<h3>Facilities</h3>
 	<p class="text-sm text-muted-foreground">Manage facilities that can be linked to venues.</p>
-	<div class=" border border-muted-foreground bg-muted">
+	<div class="">
 		{#if facilities.state === 'pending'}
-			<p class="p-xs">{facilities.message}</p>
+			<div class="flex animate-pulse flex-col gap-0.5 rounded-sm">
+				<div class="h-9 w-full rounded-t-sm bg-muted"></div>
+				<div class="h-9 w-full bg-muted"></div>
+				<div class="h-9 w-full bg-muted"></div>
+				<div class="h-9 w-full rounded-b-sm bg-muted"></div>
+			</div>
 		{:else if facilities.state === 'success'}
-			{#each facilities.data as facility}
+			{#each facilities.data as org}
 				<div
-					class="w-full justify-start rounded-none border-b border-b-muted-foreground px-sm py-xs text-sm text-secondary-foreground"
+					class={[
+						'flex w-full justify-start border-x border-b border-foreground px-sm py-xs text-sm first:rounded-t-sm first:border-t last:rounded-b-sm last:border-b',
+					]}>{org.name}</div
 				>
-					{facility.name}
-				</div>
 			{/each}
-			<div class="flex w-full items-center p-xxs max-sm:flex-col">
-				<Input
+			<div
+				class="flex w-full border-x border-b border-foreground p-xs text-sm first:rounded-t-sm first:border-t last:rounded-b-sm last:border-b max-sm:flex-col"
+			>
+				<input
 					bind:value={newFacilityValue}
 					onchange={(e) => {
 						newFacilityValue = e.currentTarget.value;
 					}}
 					name="facilityName"
-					class="w-full rounded-none border-secondary-foreground"
+					placeholder="New Facility"
+					class="w-full rounded bg-muted p-xs"
 					type="text"
 				/>
 				<Button onclick={onSave} variant="link"><PlusIcon /> Add</Button>

@@ -153,33 +153,43 @@
 </script>
 
 <div class="flex w-full max-w-200 flex-col gap-y-sm p-r-pad">
-	<h2 class="text-lg">Venue Types</h2>
+	<h3>Venue Types</h3>
 	<p class="text-sm text-muted-foreground">
 		Manage children and roles associated with each venue type here. Select an item to manage its
 		entities
 	</p>
-	<div class=" border border-muted-foreground bg-muted">
+	<div class="">
 		{#if venueTypes.state === 'pending'}
-			<p class="p-xs">{venueTypes.message}</p>
+			<div class="flex animate-pulse flex-col gap-0.5 rounded-sm">
+				<div class="h-9 w-full rounded-t-sm bg-muted"></div>
+				<div class="h-9 w-full bg-muted"></div>
+				<div class="h-9 w-full bg-muted"></div>
+				<div class="h-9 w-full rounded-b-sm bg-muted"></div>
+			</div>
 		{:else if venueTypes.state === 'success'}
-			{#each venueTypes.data as venueType}
-				<Button
+			{#each venueTypes.data as org}
+				<button
 					onclick={async () => {
-						activeVenueType = venueType;
+						activeVenueType = org;
 						setActiveTab(venueTypeActiveTab);
 					}}
-					class="w-full justify-start rounded-none border-b border-b-muted-foreground text-sm text-secondary-foreground"
-					variant="link">{venueType.name}</Button
+					class={[
+						'flex w-full cursor-pointer justify-start border-x border-b border-foreground px-sm py-xs text-sm first:rounded-t-sm first:border-t last:rounded-b-sm last:border-b hover:bg-muted hover:underline',
+						activeVenueType?.id == org.id ? 'bg-primary/10 text-primary hover:bg-primary/20' : ''
+					]}>{org.name}</button
 				>
 			{/each}
-			<div class="flex w-full items-center p-xxs max-sm:flex-col">
-				<Input
+			<div
+				class="flex w-full border-x border-b border-foreground p-xs text-sm first:rounded-t-sm first:border-t last:rounded-b-sm last:border-b max-sm:flex-col"
+			>
+				<input
 					bind:value={newVenueTypeValue}
 					onchange={(e) => {
 						newVenueTypeValue = e.currentTarget.value;
 					}}
 					name="orgName"
-					class="w-full rounded-none border-secondary-foreground"
+					placeholder="New Organization type"
+					class="w-full rounded bg-muted p-xs"
 					type="text"
 				/>
 				<Button onclick={onSave} variant="link"><PlusIcon /> Add</Button>
@@ -189,96 +199,46 @@
 		{/if}
 	</div>
 	{#if activeVenueType !== null}
-		<div class="border border-muted-foreground bg-muted">
-			<h3 class="text- p-xs font-medium">{activeVenueType?.name}</h3>
+		<div class="rounded-sm border border-foreground">
+			<h3 class="p-xs font-medium">{activeVenueType?.name}</h3>
 			<div class="flex gap-x-xxs">
-				<!-- todo: check if venue-types have children -->
-				<!-- <TabButton
-					onclick={setActiveTab}
-					title="Children"
-					isActive={venueTypeActiveTab === 'Children'}
-				/> -->
-				<TabButton onclick={setActiveTab} title="Roles" isActive={venueTypeActiveTab === 'Roles'} />
+				<TabButton onclick={setActiveTab} title="Roles" isActive={true} />
 			</div>
 			<div class="border-t border-muted-foreground">
-				{#if venueTypeActiveTab === 'Children'}
-					{#if venueTypeChildren.state === 'pending'}
-						<p class="p-xs">{venueTypeChildren.message}</p>
-					{:else if venueTypeChildren.state === 'success' && venueTypes.state === 'success'}
-						{@const selectTrigCont =
-							venueTypes.data.find((item) => item.id === activeVenueType?.selectedChildId)?.name ??
-							'Select a child'}
-						{@const selectItems = venueTypes.data
-							.filter(
-								(item) =>
-									item.id !== activeVenueType?.id &&
-									venueTypeChildren.state === 'success' &&
-									venueTypeChildren.data.findIndex((child) => child.id === item.id) === -1
-							)
-							.map((item) => ({ value: item.id, label: item.name }))}
-						{#each venueTypeChildren.data as child}
+				{#if venueTypeRoles.state === 'pending'}
+					<p class="p-xs">{venueTypeRoles.message}</p>
+				{:else if venueTypeRoles.state === 'success'}
+					{#each venueTypeRoles.data as role}
+						<div
+							class="flex w-full items-center justify-start rounded-none border-b border-b-muted-foreground px-sm text-sm text-secondary-foreground"
+						>
+							<p class="w-full">{role.name}</p>
 							<Button
-								class="w-full justify-start rounded-none border-b border-b-muted-foreground text-sm text-secondary-foreground"
-								variant="link">{child.name}</Button
-							>
-						{/each}
-						<div class="flex">
-							<SelectButton
-								name="Organization"
-								class="w-full"
-								bind:value={activeVenueType.selectedChildId!}
-								itemsList={selectItems}
-								optionName="label"
-								optionValue="value"
-							/>
-							<Button
-								variant="link"
 								onclick={() => {
-									onChildAdd(activeVenueType!.id, activeVenueType!.selectedChildId!);
+									selectedRole = role;
+									roleSheetOpen = true;
 								}}
-								class="rounded-none"><PlusIcon />Add</Button
+								size="icon"
+								variant="ghost"><PencilIcon /></Button
 							>
+							<Button class="text-red-400" size="icon" variant="ghost"><TrashIcon /></Button>
 						</div>
-						<!-- <Button variant="link"><PlusIcon /> Add new Child</Button> -->
-					{:else if venueTypeChildren.state === 'failed'}
-						<p class="p-xs">Failed to Load: {venueTypeChildren.message}</p>
-					{/if}
-				{:else if venueTypeActiveTab === 'Roles'}
-					{#if venueTypeRoles.state === 'pending'}
-						<p class="p-xs">{venueTypeRoles.message}</p>
-					{:else if venueTypeRoles.state === 'success'}
-						{#each venueTypeRoles.data as role}
-							<div
-								class="flex w-full items-center justify-start rounded-none border-b border-b-muted-foreground px-sm text-sm text-secondary-foreground"
-							>
-								<p class="w-full">{role.name}</p>
-								<Button
-									onclick={() => {
-										selectedRole = role;
-										roleSheetOpen = true;
-									}}
-									size="icon"
-									variant="ghost"><PencilIcon /></Button
-								>
-								<Button class="text-red-400" size="icon" variant="ghost"><TrashIcon /></Button>
-							</div>
-						{/each}
-						<div class="flex w-full items-center p-xxs max-sm:flex-col">
-							<Input
-								bind:value={newRoleValue}
-								onchange={(e) => {
-									newRoleValue = e.currentTarget.value;
-								}}
-								name="orgName"
-								class="w-full max-w-100 rounded-none border-secondary-foreground "
-								type="text"
-							/>
-							<Button onclick={onRoleSave} variant="link"><PlusIcon /> Add</Button>
-						</div>
-						<!-- <Button variant="link"><PlusIcon /> Add</Button> -->
-					{:else}
-						<p class="p-xs">Failed to Load: {venueTypeRoles.message}</p>
-					{/if}
+					{/each}
+					<div class="flex w-full p-xs text-sm max-sm:flex-col">
+						<input
+							bind:value={newRoleValue}
+							onchange={(e) => {
+								newRoleValue = e.currentTarget.value;
+							}}
+							name="orgName"
+							placeholder="New Role"
+							class="w-full rounded bg-muted p-xs"
+							type="text"
+						/>
+						<Button onclick={onRoleSave} variant="link"><PlusIcon /> Add</Button>
+					</div>
+				{:else}
+					<p class="p-xs">Failed to Load: {venueTypeRoles.message}</p>
 				{/if}
 			</div>
 		</div>

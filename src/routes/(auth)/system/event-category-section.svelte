@@ -53,27 +53,35 @@
 </script>
 
 <div class="flex w-full max-w-200 flex-col gap-y-sm p-r-pad">
-	<h2 class="text-lg">Event Categories</h2>
+	<h3>Event Categories</h3>
 	<p class="text-sm text-muted-foreground">Manage Event Categories.</p>
-	<div class=" border border-muted-foreground bg-muted">
+	<div class="">
 		{#if categories.state === 'pending'}
-			<p class="p-xs">{categories.message}</p>
+			<div class="flex animate-pulse flex-col gap-0.5 rounded-sm">
+				<div class="h-9 w-full rounded-t-sm bg-muted"></div>
+				<div class="h-9 w-full bg-muted"></div>
+				<div class="h-9 w-full bg-muted"></div>
+				<div class="h-9 w-full rounded-b-sm bg-muted"></div>
+			</div>
 		{:else if categories.state === 'success'}
 			{#each categories.data as category}
 				<div
-					class="w-full justify-start rounded-none border-b border-b-muted-foreground px-sm py-xs text-sm text-secondary-foreground"
+					class={[
+						'flex w-full justify-start border-x border-b border-foreground px-sm py-xs text-sm first:rounded-t-sm first:border-t last:rounded-b-sm last:border-b',
+					]}>{category.name}</div
 				>
-					{category.name}
-				</div>
 			{/each}
-			<div class="flex w-full items-center p-xxs max-sm:flex-col">
-				<Input
+			<div
+				class="flex w-full border-x border-b border-foreground p-xs text-sm first:rounded-t-sm first:border-t last:rounded-b-sm last:border-b max-sm:flex-col"
+			>
+				<input
 					bind:value={newCategoryValue}
 					onchange={(e) => {
 						newCategoryValue = e.currentTarget.value;
 					}}
-					name="facilityName"
-					class="w-full rounded-none border-secondary-foreground"
+					name="eventCategory"
+					placeholder="New Category"
+					class="w-full rounded bg-muted p-xs"
 					type="text"
 				/>
 				<Button onclick={onSave} variant="link"><PlusIcon /> Add</Button>

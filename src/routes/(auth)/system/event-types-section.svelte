@@ -17,7 +17,7 @@
 		EventTypeVenuePolicyType,
 		EventTypeCollaborationPolicyType
 	} from '$lib/types';
-	import { Loader, PlusIcon } from '@lucide/svelte';
+	import { Blend, Check, Loader, MapPin, PencilIcon, PlusIcon, TrashIcon } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { loadWorkflowTemplate, loadWorkflowTemplates } from '$lib/api/workflow-templates';
@@ -194,35 +194,88 @@
 </script>
 
 <div class="flex w-full max-w-200 flex-col gap-y-sm p-r-pad">
-	<h2 class="text-lg">Event Types</h2>
+	<h3>Event Types</h3>
 	<p class="text-sm text-muted-foreground">
 		Manage event types and their allowed child types. Select an item to manage its children.
 	</p>
-	<div class="border border-muted-foreground bg-muted">
+	<div class="">
 		{#if eventTypes.state === 'pending'}
-			<p class="p-xs">{eventTypes.message}</p>
+			<div class="flex animate-pulse flex-col gap-0.5 rounded-sm">
+				<div class="h-9 w-full rounded-t-sm bg-muted"></div>
+				<div class="h-9 w-full bg-muted"></div>
+				<div class="h-9 w-full bg-muted"></div>
+				<div class="h-9 w-full rounded-b-sm bg-muted"></div>
+			</div>
 		{:else if eventTypes.state === 'success'}
-			{#each eventTypes.data as et}
-				<Button
+			{#each eventTypes.data as eventType}
+				<!-- <button
 					onclick={async () => {
-						activeEventType = et;
+						activeEventType = eventType;
 					}}
-					class="w-full justify-start rounded-none border-b border-b-muted-foreground text-sm text-secondary-foreground"
-					variant="link">{et.name}</Button
+					class={[
+						'flex w-full cursor-pointer justify-start border-x border-b border-foreground px-sm py-xs text-sm first:rounded-t-sm first:border-t last:rounded-b-sm last:border-b hover:bg-muted hover:underline',
+						activeEventType?.id == eventType.id
+							? 'bg-primary/10 text-primary hover:bg-primary/20'
+							: ''
+					]}>{eventType.name}</button
+				> -->
+				<Button
+					variant="outline"
+					size="sm"
+					class={[
+						'flex h-auto w-full flex-col items-start border-foreground border-x border-b first:border-t border-t-0 rounded-none p-2 first:rounded-t-sm last:rounded-b-sm',
+						activeEventType?.id === eventType.id
+							? 'border-primary/20 bg-primary/10 hover:bg-primary/15'
+							: ''
+					]}
+					onclick={() => {
+						activeEventType = eventType;
+					}}
 				>
+					<div class="flex w-full flex-col items-start gap-1">
+						<div class="flex w-full items-center justify-between">
+							<p class="text-base">{eventType.name}</p>
+						</div>
+						<div class="flex flex-col justify-start gap-1 text-xs text-muted-foreground">
+							<div class="flex items-center gap-1">
+								<MapPin />
+								{#if eventType.venuePolicy === 'optional'}
+									Venues are optional
+								{:else if eventType.venuePolicy === 'forbidden'}
+									Venues not supported
+								{:else}At least one venue required
+								{/if}
+							</div>
+							<div class="flex items-center gap-1">
+								<Blend />
+								{#if eventType.collaborationPolicy === 'optional'}
+									Organizers are optional
+								{:else if eventType.collaborationPolicy === 'forbidden'}
+									Collaboration not supported
+								{:else}
+									At least one organizer required
+								{/if}
+							</div>
+						</div>
+					</div>
+				</Button>
 			{/each}
-			<Button
-				onclick={() => {
-					addEventTypeSheetOpen = true;
-				}}
-				variant="link"><PlusIcon /> Add</Button
+			<div
+				class="flex w-full border-x border-b border-foreground p-xs text-sm first:rounded-t-sm first:border-t last:rounded-b-sm last:border-b max-sm:flex-col"
 			>
+				<Button
+					onclick={() => {
+						addEventTypeSheetOpen = true;
+					}}
+					variant="link"><PlusIcon /> Add</Button
+				>
+			</div>
 		{:else}
 			<p class="p-xs">Failed to Load: {eventTypes.message}</p>
 		{/if}
 	</div>
 	{#if activeEventType !== null}
-		<div class="border border-muted-foreground bg-muted">
+		<div class="rounded-sm border border-foreground">
 			<h3 class="p-xs font-medium">{activeEventType?.name}</h3>
 			<div class="flex gap-x-xxs">
 				<TabButton onclick={() => {}} title="Children" isActive={true} />
@@ -230,27 +283,39 @@
 			<div class="border-t border-muted-foreground">
 				{#if eventTypeChildren.state === 'pending'}
 					<p class="p-xs">{eventTypeChildren.message}</p>
-				{:else if eventTypeChildren.state === 'success' && eventTypes.state === 'success'}
-					{#each eventTypeChildren.data as child}
-						<Button
-							class="w-full justify-start rounded-none border-b border-b-muted-foreground text-sm text-secondary-foreground"
-							variant="link">{child.name}</Button
+				{:else if eventTypeChildren.state === 'success'}
+					{#each eventTypeChildren.data as role}
+						<div
+							class="flex w-full items-center justify-start rounded-none border-b border-b-muted-foreground px-sm text-sm text-secondary-foreground"
 						>
+							<p class="w-full">{role.name}</p>
+							<Button
+								onclick={() => {
+									// selectedRole = role;
+									// roleSheetOpen = true;
+								}}
+								size="icon"
+								variant="ghost"><PencilIcon /></Button
+							>
+							<Button class="text-red-400" size="icon" variant="ghost"><TrashIcon /></Button>
+						</div>
 					{/each}
-					<div class="flex">
-						<SelectButton
-							name="event types"
-							class="w-full"
-							itemsList={eventTypes.data.filter(
-								(e) =>
-									eventTypeChildren.state === 'success' &&
-									e.id !== activeEventType?.id &&
-									!eventTypeChildren.data.some((c) => c.id === e.id)
-							)}
-							optionName="name"
-							optionValue="id"
-							bind:value={activeEventType.selectedChildId}
-						/>
+					<div class="flex w-full p-xs text-sm max-sm:flex-col">
+						{#if eventTypes.state === 'success'}
+							<SelectButton
+								name="event types"
+								class="w-full"
+								itemsList={eventTypes.data.filter(
+									(e) =>
+										eventTypeChildren.state === 'success' &&
+										e.id !== activeEventType?.id &&
+										!eventTypeChildren.data.some((c) => c.id === e.id)
+								)}
+								optionName="name"
+								optionValue="id"
+								bind:value={activeEventType.selectedChildId}
+							/>
+						{/if}
 						<Button
 							disabled={addEventTypeChildLoading}
 							variant="link"
@@ -265,7 +330,7 @@
 							{/if}Add</Button
 						>
 					</div>
-				{:else if eventTypeChildren.state === 'failed'}
+				{:else}
 					<p class="p-xs">Failed to Load: {eventTypeChildren.message}</p>
 				{/if}
 			</div>
