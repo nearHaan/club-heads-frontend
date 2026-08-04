@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { loadCalculatedCalendarEvents } from '$lib/api/me/me';
 	import { loadVenues } from '$lib/api/venue';
-	import DatePicker from '$lib/components/app/date-picker.svelte';
 	import ShapeAvatarSvg from '$lib/components/app/shape-avatar-svg.svelte';
 	import { buttonVariants } from '$lib/components/ui/button';
 	import Button from '$lib/components/ui/button/button.svelte';
@@ -10,10 +9,11 @@
 	import * as Popover from '$lib/components/ui/popover/index';
 	import { MONTHS_SHORT } from '$lib/constants';
 	import { formatDateDayAndMonth, formatDateOnlyTime } from '$lib/helpers';
-	import type { CalendarEventsAndDate, EventOrganizer, LoadedData, Venue } from '$lib/types';
-	import { getLocalTimeZone, toCalendarDate, CalendarDate } from '@internationalized/date';
+	import type { CalendarEventsAndDate, LoadedData, Venue } from '$lib/types';
+	import { CalendarDate } from '@internationalized/date';
 	import { CalendarIcon, Check, Clock, X } from '@lucide/svelte';
-	import { slide } from 'svelte/transition';
+	import { onMount } from 'svelte';
+	import { nav } from '../header.svelte';
 
 	let venues = $state<LoadedData<Venue[]>>({
 		state: 'pending',
