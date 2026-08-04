@@ -50,6 +50,10 @@
 		return new Date(date.year, date.month - 1, date.day);
 	}
 
+	onMount(() => {
+		nav.set([{ title: 'Events Calendar', url: '/events-calendar' }]);
+	});
+
 	$effect(() => {
 		(async () => {
 			try {
