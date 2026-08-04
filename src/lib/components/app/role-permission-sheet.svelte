@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { createUser } from '$lib/api/users';
+	import { loadPermissions, loadRolePerms, updateRolePermissions } from '$lib/api/permissions';
 	import Button, { buttonVariants } from '$lib/components/ui/button/button.svelte';
 	import Input from '$lib/components/ui/input/input.svelte';
 	import Label from '$lib/components/ui/label/label.svelte';
 	import * as Sheet from '$lib/components/ui/sheet/index.js';
 	import type {
+		FacilityType,
 		LoadedData,
 		OrganizationType,
 		PermissionChildType,
@@ -12,10 +13,7 @@
 		RoleType,
 		VenueType
 	} from '$lib/types';
-	import { onMount } from 'svelte';
 	import Checkbox from '../ui/checkbox/checkbox.svelte';
-	import { loadPermissions, loadRolePerms, updateRolePermissions } from '$lib/api/permissions';
-	import { derived } from 'svelte/store';
 	import SideSheet from './side-sheet.svelte';
 
 	let {
@@ -23,7 +21,12 @@
 		title,
 		org,
 		role
-	}: { open: boolean; title: string; org: OrganizationType | VenueType; role: RoleType } = $props();
+	}: {
+		open: boolean;
+		title: string;
+		org: OrganizationType | VenueType | FacilityType;
+		role: RoleType;
+	} = $props();
 
 	let errorText = $state('');
 

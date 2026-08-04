@@ -1,9 +1,7 @@
 <script lang="ts">
 	import { addEventCategory, loadEventCategories } from '$lib/api/event-categories';
-	import { addFacility, loadFacilities } from '$lib/api/facilities';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import Input from '$lib/components/ui/input/input.svelte';
-	import type { EventCategory, Facility, LoadedData } from '$lib/types';
+	import type { EventCategory, LoadedData } from '$lib/types';
 	import { PlusIcon } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
@@ -53,8 +51,10 @@
 </script>
 
 <div class="flex w-full max-w-200 flex-col gap-y-sm p-r-pad">
-	<h3>Event Categories</h3>
-	<p class="text-sm text-muted-foreground">Manage Event Categories.</p>
+	<div>
+		<h3>Event Categories</h3>
+		<p class="text-sm text-muted-foreground">Manage Event Categories.</p>
+	</div>
 	<div class="">
 		{#if categories.state === 'pending'}
 			<div class="flex animate-pulse flex-col gap-0.5 rounded-sm">
@@ -67,9 +67,11 @@
 			{#each categories.data as category}
 				<div
 					class={[
-						'flex w-full justify-start border-x border-b border-foreground px-sm py-xs text-sm first:rounded-t-sm first:border-t last:rounded-b-sm last:border-b',
-					]}>{category.name}</div
+						'flex w-full justify-start border-x border-b border-foreground px-sm py-xs text-sm first:rounded-t-sm first:border-t last:rounded-b-sm last:border-b'
+					]}
 				>
+					{category.name}
+				</div>
 			{/each}
 			<div
 				class="flex w-full border-x border-b border-foreground p-xs text-sm first:rounded-t-sm first:border-t last:rounded-b-sm last:border-b max-sm:flex-col"

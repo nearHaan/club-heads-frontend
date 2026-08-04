@@ -1,30 +1,28 @@
 <script lang="ts">
 	import {
-		createEventType,
-		loadEventTypes,
-		loadEventTypeChildren,
 		addEventTypeChild,
-		addEventType
+		createEventType,
+		loadEventTypeChildren,
+		loadEventTypes
 	} from '$lib/api/event-types';
+	import { loadWorkflowTemplate, loadWorkflowTemplates } from '$lib/api/workflow-templates';
 	import SelectButton from '$lib/components/app/select-button.svelte';
+	import SideSheet from '$lib/components/app/side-sheet.svelte';
 	import TabButton from '$lib/components/app/tab-button.svelte';
 	import Button, { buttonVariants } from '$lib/components/ui/button/button.svelte';
 	import Input from '$lib/components/ui/input/input.svelte';
-	import type {
-		WorkflowTemplate,
-		EventType,
-		LoadedData,
-		EventTypeVenuePolicyType,
-		EventTypeCollaborationPolicyType
-	} from '$lib/types';
-	import { Blend, Check, Loader, MapPin, PencilIcon, PlusIcon, TrashIcon } from '@lucide/svelte';
-	import { onMount } from 'svelte';
-	import { toast } from 'svelte-sonner';
-	import { loadWorkflowTemplate, loadWorkflowTemplates } from '$lib/api/workflow-templates';
-	import { EVENT_TYPE_COLLABORATION_POLICY, EVENT_TYPE_VENUE_POLICY } from '$lib/types';
 	import Label from '$lib/components/ui/label/label.svelte';
 	import * as Sheet from '$lib/components/ui/sheet';
-	import SideSheet from '$lib/components/app/side-sheet.svelte';
+	import type {
+		EventType,
+		EventTypeCollaborationPolicyType,
+		EventTypeVenuePolicyType,
+		LoadedData,
+		WorkflowTemplate
+	} from '$lib/types';
+	import { EVENT_TYPE_COLLABORATION_POLICY, EVENT_TYPE_VENUE_POLICY } from '$lib/types';
+	import { Blend, Loader, MapPin, PencilIcon, PlusIcon, TrashIcon } from '@lucide/svelte';
+	import { onMount } from 'svelte';
 
 	let eventTypes = $state<LoadedData<(EventType & { selectedChildId: number | null })[]>>({
 		state: 'pending',
@@ -194,10 +192,13 @@
 </script>
 
 <div class="flex w-full max-w-200 flex-col gap-y-sm p-r-pad">
-	<h3>Event Types</h3>
-	<p class="text-sm text-muted-foreground">
-		Manage event types and their allowed child types. Select an item to manage its children.
-	</p>
+	<div>
+		<h3>Event Types</h3>
+		<p class="text-sm text-muted-foreground">
+			Manage event types and their allowed child types. Select an item to manage its children.
+		</p>
+	</div>
+
 	<div class="">
 		{#if eventTypes.state === 'pending'}
 			<div class="flex animate-pulse flex-col gap-0.5 rounded-sm">
@@ -223,7 +224,7 @@
 					variant="outline"
 					size="sm"
 					class={[
-						'flex h-auto w-full flex-col items-start border-foreground border-x border-b first:border-t border-t-0 rounded-none p-2 first:rounded-t-sm last:rounded-b-sm',
+						'flex h-auto w-full flex-col items-start rounded-none border-x border-t-0 border-b border-foreground p-2 first:rounded-t-sm first:border-t last:rounded-b-sm',
 						activeEventType?.id === eventType.id
 							? 'border-primary/20 bg-primary/10 hover:bg-primary/15'
 							: ''

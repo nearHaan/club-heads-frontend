@@ -213,6 +213,11 @@ export type VenueType = {
 	selectedRoleId: number | null;
 };
 
+export type FacilityType = {
+	id: number;
+	name: string;
+};
+
 export type ChildType = {
 	id: number;
 	name: string;

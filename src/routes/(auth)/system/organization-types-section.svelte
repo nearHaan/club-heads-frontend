@@ -11,9 +11,8 @@
 	import SelectButton from '$lib/components/app/select-button.svelte';
 	import TabButton from '$lib/components/app/tab-button.svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import Input from '$lib/components/ui/input/input.svelte';
 	import type { ChildType, LoadedData, OrganizationType, RoleType } from '$lib/types';
-	import { Edit2Icon, PencilIcon, PlusIcon, TrashIcon } from '@lucide/svelte';
+	import { PencilIcon, PlusIcon, TrashIcon } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
@@ -152,18 +151,20 @@
 </script>
 
 <div class="flex w-full max-w-200 flex-col gap-y-sm p-r-pad">
-	<h3>Organization Types</h3>
-	<p class="text-sm text-muted-foreground">
-		Manage children and roles associated with each organization type here. Select an item to manage
-		its entities
-	</p>
+	<div>
+		<h3>Organization Types</h3>
+		<p class="text-sm text-muted-foreground">
+			Manage children and roles associated with each organization type here. Select an item to
+			manage its entities
+		</p>
+	</div>
 	<div class="">
 		{#if orgTypes.state === 'pending'}
-			<div class="rounded-sm flex flex-col gap-0.5 animate-pulse">
-			<div class="h-9 w-full bg-muted rounded-t-sm"></div>
-			<div class="h-9 w-full bg-muted"></div>
-			<div class="h-9 w-full bg-muted"></div>
-			<div class="h-9 w-full bg-muted rounded-b-sm"></div>
+			<div class="flex animate-pulse flex-col gap-0.5 rounded-sm">
+				<div class="h-9 w-full rounded-t-sm bg-muted"></div>
+				<div class="h-9 w-full bg-muted"></div>
+				<div class="h-9 w-full bg-muted"></div>
+				<div class="h-9 w-full rounded-b-sm bg-muted"></div>
 			</div>
 		{:else if orgTypes.state === 'success'}
 			{#each orgTypes.data as org}
@@ -172,8 +173,10 @@
 						activeOrgTpe = org;
 						setActiveTab(orgTypeActiveTab);
 					}}
-					class={["flex w-full cursor-pointer justify-start border-x border-b border-foreground px-sm py-xs text-sm first:rounded-t-sm first:border-t last:rounded-b-sm last:border-b hover:bg-muted hover:underline", activeOrgTpe?.id == org.id ? 'bg-primary/10 text-primary hover:bg-primary/20' : '']}
-					>{org.name}</button
+					class={[
+						'flex w-full cursor-pointer justify-start border-x border-b border-foreground px-sm py-xs text-sm first:rounded-t-sm first:border-t last:rounded-b-sm last:border-b hover:bg-muted hover:underline',
+						activeOrgTpe?.id == org.id ? 'bg-primary/10 text-primary hover:bg-primary/20' : ''
+					]}>{org.name}</button
 				>
 			{/each}
 			<div
