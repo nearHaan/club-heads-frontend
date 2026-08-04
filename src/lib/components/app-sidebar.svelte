@@ -1,10 +1,11 @@
 <script lang="ts">
 	import {
 		BuildingIcon,
+		CalendarClockIcon,
 		CalendarIcon,
 		CircleCheck,
 		CirclePileIcon,
-		Home,
+		HouseIcon,
 		Link,
 		LogOut,
 		MonitorCogIcon,
@@ -54,12 +55,12 @@
 					{
 						title: 'Home',
 						url: '/',
-						icon: Home
+						icon: HouseIcon
 					},
 					{
 						title: 'Event Calendar',
 						url: '/event-calendar',
-						icon: CircleCheck
+						icon: CalendarClockIcon
 					},
 					{
 						title: 'Approvals',
@@ -143,7 +144,7 @@
 	<Sidebar.Footer>
 		<Sidebar.Menu>
 			<Sidebar.MenuItem>
-				<Sidebar.MenuButton>
+				<Sidebar.MenuButton class="border px-3 py-4 text-destructive">
 					{#snippet child({ props })}
 						<a
 							href="/login"
