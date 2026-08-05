@@ -1,14 +1,12 @@
 <script lang="ts">
-	import { createVenue } from '$lib/api/venue.js';
-	import { loadOrgs } from '$lib/api/organizations.js';
-	import { loadVenueTypes } from '$lib/api/venue-types.js';
+	import { createFacility } from '$lib/api/facilities';
+	import { loadFacilityTypes } from '$lib/api/facility-types';
 	import DynamicSelectButton from '$lib/components/app/dynamic-select-button.svelte';
 	import SelectButton from '$lib/components/app/select-button.svelte';
+	import SideSheet from '$lib/components/app/side-sheet.svelte';
 	import Button, { buttonVariants } from '$lib/components/ui/button/button.svelte';
 	import Input from '$lib/components/ui/input/input.svelte';
 	import Label from '$lib/components/ui/label/label.svelte';
-	import Checkbox from '$lib/components/ui/checkbox/checkbox.svelte';
-	import Textarea from '$lib/components/ui/textarea/textarea.svelte';
 	import * as Sheet from '$lib/components/ui/sheet/index.js';
 	import type {
 		Facility,
@@ -16,14 +14,9 @@
 		FacilityOverlapPolicy,
 		FacilityType,
 		FacilityWorkflowParticipationPolicy,
-		LoadedData,
-		Venue
+		LoadedData
 	} from '$lib/types';
-	import SideSheet from '$lib/components/app/side-sheet.svelte';
 	import { Loader } from '@lucide/svelte';
-	import { createFacility } from '$lib/api/facilities';
-	import { loadFacilityTypes } from '$lib/api/facility-types';
-	import { Select } from '$lib/components/ui/select';
 
 	let form: HTMLFormElement;
 	let {
@@ -123,7 +116,7 @@
 
 		<div class="grid gap-y-xxs">
 			<Label for="facilityTypeId">Facility Type</Label>
-			<DynamicSelectButton name="facilityType" bind:value={type} loadFn={loadFacilityTypes}/>
+			<DynamicSelectButton name="facilityType" bind:value={type} loadFn={loadFacilityTypes} />
 		</div>
 
 		<div class="grid gap-y-xxs">
