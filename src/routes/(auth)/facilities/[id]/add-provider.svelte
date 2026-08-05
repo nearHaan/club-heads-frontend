@@ -37,13 +37,13 @@
 					id: id,
 					scope: {
 						id: selectedKind.id,
-						kind: { id: 0, name: ''},
+						kind: { id: 0, name: '' },
 						name: selectedKind.name,
 						type: selectedKindType
 					}
 				}
 			];
-			open = false
+			open = false;
 		} catch (err: any) {
 			errorText = err.message ?? 'Something went wrong';
 		} finally {
@@ -85,7 +85,7 @@
 					<Loader size="15" class="animate-spin" />
 				{/if} Add
 			</Button>
-			<Sheet.Close class={buttonVariants({ variant: 'outline' })}>Close</Sheet.Close>
+			<Sheet.Close type="button" class={buttonVariants({ variant: 'outline' })}>Close</Sheet.Close>
 		</Sheet.Footer>
 	</form>
 </SideSheet>
