@@ -1,4 +1,3 @@
-<!-- TODO: Make this sheet reusable for both venues and organization -->
 <script lang="ts">
 	import * as Sheet from '$lib/components/ui/sheet/index.js';
 	import type { ApiFailure, LoadedData, EntityMember, Role } from '$lib/types';
@@ -9,8 +8,8 @@
 	import SelectButton from '$lib/components/app/select-button.svelte';
 	import { buttonVariants } from '$lib/components/ui/button/button.svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import { deleteVenueMember, getVenueMemberByEmail, updateVenueMemberRoles } from '$lib/api/venue';
 	import SideSheet from '$lib/components/app/side-sheet.svelte';
+	import { deleteFacilityMember, getFacilityMemberByEmail, updateFacilityMemberRoles } from '$lib/api/facilities';
 
 	let userId: number | null = $state(null);
 	let userRoles = $state<LoadedData<EntityMember['roles']>>({
@@ -62,7 +61,7 @@
 			if (emailValue.trim().length === 0) return;
 			isRoleLoading = true;
 			isLoadBtnActive = false;
-			const member = await getVenueMemberByEmail(id, emailValue);
+			const member = await getFacilityMemberByEmail(id, emailValue);
 			userRoles = {
 				state: 'success',
 				data: member.roles
@@ -89,7 +88,7 @@
 			errorText = '';
 			if (userRoles.state !== 'success') return;
 			isSaving = true;
-			await updateVenueMemberRoles(
+			await updateFacilityMemberRoles(
 				id,
 				userId!,
 				currentRoles.map((role) => role.roleId)
@@ -113,7 +112,7 @@
 			errorText = '';
 			if (userRoles.state !== 'success') return;
 			isDeleting = true;
-			await deleteVenueMember(id, userId!);
+			await deleteFacilityMember(id, userId!);
 			clearUser();
 			open = false;
 		} catch (error: any) {
@@ -253,7 +252,7 @@
 						{:else}
 							<div class="flex flex-col gap-y-xs bg-muted p-xs">
 								<p class="text-sm text-muted-foreground">
-									This action will remove the user from this venue, but will not delete the user.
+									This action will remove the user from this facility, but will not delete the user.
 									This action cannot be undone.
 								</p>
 								<Button onclick={deleteMember} variant="destructive"

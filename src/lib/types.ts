@@ -131,7 +131,7 @@ export type CalendarEventsAndDate = {
 	events: CalculatedCalendarDayEvent[];
 };
 
-export const ENTITIES = ['organization', 'venue'] as const;
+export const ENTITIES = ['organization', 'venue', 'facility'] as const;
 export type EntityType = (typeof ENTITIES)[number];
 
 export type EntityMember = {
@@ -171,6 +171,36 @@ export type Venue = {
 	isAvailable: boolean;
 	unavailabilityReason: string | null;
 	isActive: boolean;
+};
+
+export type FacilityAssociationMethod = 'event' | 'venue_allotment';
+export type FacilityOverlapPolicy = 'shared' | 'exclusive';
+export type FacilityWorkflowParticipationPolicy = 'include' | 'exclude';
+export type FacilityProviderEntityType = 'organization' | 'venue';
+
+export type Facility = {
+	id: number;
+	name: string;
+	type: {
+		id: number;
+		name: string;
+	};
+	association: FacilityAssociationMethod;
+	overlapPolicy: FacilityOverlapPolicy;
+	workflowParticipationPolicy: FacilityWorkflowParticipationPolicy;
+	isAvailable: boolean;
+	providers: {
+		id: number;
+		scope: {
+			type: FacilityProviderEntityType;
+			id: number;
+			name: string;
+			kind: {
+				id: number;
+				name: string;
+			};
+		};
+	}[];
 };
 
 // TODO: Match types
@@ -360,11 +390,6 @@ type LoadingFailure = {
 	message: string;
 };
 
-export type Facility = {
-	id: number;
-	name: string;
-};
-
 export type EventStatus = 'draft' | 'pending' | 'approved' | 'cancelled' | 'overridden';
 export type EventOrganizerRole = (typeof EVENT_ORGANIZER_ROLE)[number];
 export type EventTypeVenuePolicy = 'required' | 'optional' | 'forbidden';
@@ -515,6 +540,14 @@ export type CreateVenueData = {
 	isAvailable: boolean;
 	organizationId?: number | null | undefined;
 	unavailabilityReason?: string | undefined;
+};
+
+export type CreateFacilityData = {
+	name: string;
+	typeId: number;
+	association: FacilityAssociationMethod;
+	overlapPolicy: FacilityOverlapPolicy;
+	workflowParticipationPolicy: FacilityWorkflowParticipationPolicy;
 };
 
 export type ParentableEvent = {

@@ -10,7 +10,8 @@
 		LogOut,
 		MonitorCogIcon,
 		NetworkIcon,
-		UsersIcon
+		UsersIcon,
+		BedIcon
 	} from '@lucide/svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { authInfo } from '$lib/global/auth.svelte';
@@ -31,14 +32,19 @@
 						icon: UsersIcon
 					},
 					{
+						title: 'Organizations',
+						url: '/organizations',
+						icon: CirclePileIcon
+					},
+					{
 						title: 'Venues',
 						url: '/venues',
 						icon: BuildingIcon
 					},
 					{
-						title: 'Organizations',
-						url: '/organizations',
-						icon: CirclePileIcon
+						title: 'Facilities',
+						url: '/facilities',
+						icon: BedIcon
 					},
 					{
 						title: 'Workflow Templates',
@@ -90,6 +96,15 @@
 								}
 							]
 						: []),
+					...(canAccessRoute('/organizations')
+						? [
+								{
+									title: 'Organizations',
+									url: '/organizations',
+									icon: CirclePileIcon
+								}
+							]
+						: []),
 					...(canAccessRoute('/venues')
 						? [
 								{
@@ -99,12 +114,12 @@
 								}
 							]
 						: []),
-					...(canAccessRoute('/organizations')
+					...(canAccessRoute('/facilities')
 						? [
 								{
-									title: 'Organizations',
-									url: '/organizations',
-									icon: CirclePileIcon
+									title: 'Facilities',
+									url: '/facilities',
+									icon: BedIcon
 								}
 							]
 						: [])

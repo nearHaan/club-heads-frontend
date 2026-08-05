@@ -6,15 +6,15 @@
 	import Input from '$lib/components/ui/input/input.svelte';
 	import Label from '$lib/components/ui/label/label.svelte';
 	import * as Sheet from '$lib/components/ui/sheet/index';
-	import type { LoadedData, Organization } from '$lib/types';
+	import type { LoadedData, Organization, OrganizationType } from '$lib/types';
 	import { Loader } from '@lucide/svelte';
 
 	let errorText = $state('');
 
 	let form: HTMLFormElement;
 	let name = $state('');
-	let orgValue: null | number = $state(null);
-	let typeValue: null | number = $state(null);
+	let org: Organization | null = $state(null);
+	let type: OrganizationType | null = $state(null);
 	let addLoading = $state(false);
 
 	let {
@@ -30,12 +30,12 @@
 			const formData = new FormData(e.currentTarget as HTMLFormElement);
 
 			const name = formData.get('name')?.toString().trim();
-			if (!name || orgValue === null || typeValue === null) {
+			if (!name || org === null || type === null) {
 				errorText = 'All are required fields.';
 				return;
 			}
 			errorText = '';
-			const { id } = await createOrg(name, typeValue, orgValue);
+			const { id } = await createOrg(name, type.id, org.id);
 			organizations = {
 				state: 'success',
 				data: [
@@ -44,14 +44,14 @@
 						id: id,
 						name: name,
 						isActive: false,
-						organizationTypeId: typeValue,
-						parentOrganizationId: orgValue
+						organizationTypeId: type.id,
+						parentOrganizationId: org.id
 					}
 				]
 			};
 			form.reset();
-			typeValue = null;
-			orgValue = null;
+			type = null;
+			org = null;
 			addSheetOpen = false;
 		} catch (err: any) {
 			errorText = err.message;
@@ -74,11 +74,11 @@
 		</div>
 		<div class="grid gap-3">
 			<Label for="email" class="text-end">Type</Label>
-			<DynamicSelectButton name="type" bind:value={typeValue} loadFn={loadOrgTypes} />
+			<DynamicSelectButton name="type" bind:value={type} loadFn={loadOrgTypes} />
 		</div>
 		<div class="grid gap-3">
 			<Label for="org" class="text-end">Parent Organization</Label>
-			<DynamicSelectButton name="parent organization" bind:value={orgValue} loadFn={loadOrgs} />
+			<DynamicSelectButton name="parent organization" bind:value={org} loadFn={loadOrgs} />
 		</div>
 		<Sheet.Footer class="sticky bottom-0 bg-background p-0">
 			<Button disabled={addLoading} type="submit"

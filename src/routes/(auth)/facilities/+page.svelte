@@ -1,113 +1,97 @@
 <script lang="ts">
-	import { Funnel, Plus } from '@lucide/svelte';
-	import type { ActionMenuItem, LoadedData, TableProps, Venue, VenueType } from '$lib/types';
-	import { loadVenues } from '$lib/api/venue.js';
-	import { loadVenueTypes } from '$lib/api/venue-types.js';
-	import { onMount } from 'svelte';
-	import Button from '$lib/components/ui/button/button.svelte';
-	import AddVenue from './add-venue.svelte';
-	import VenueFacilitiesSheet from './venue-facilities-sheet.svelte';
 	import { goto } from '$app/navigation';
-	import Badge from '$lib/components/ui/badge/badge.svelte';
-	import SearchInput from '$lib/components/app/search-input.svelte';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
-	import { permissionGrantedSomewhere } from '$lib/helpers';
-	import { nav } from '../header.svelte';
+	import { loadFacilities } from '$lib/api/facilities';
+	import { loadFacilityTypes } from '$lib/api/facility-types';
 	import DataTableActions from '$lib/components/app/data-table-actions.svelte';
-	import { authInfo } from '$lib/global/auth.svelte';
+	import SearchInput from '$lib/components/app/search-input.svelte';
 	import TreeTable from '$lib/components/app/tree-table.svelte';
+	import Badge from '$lib/components/ui/badge/badge.svelte';
+	import Button from '$lib/components/ui/button/button.svelte';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
+	import { authInfo } from '$lib/global/auth.svelte';
+	import { permissionGrantedSomewhere } from '$lib/helpers';
+	import type { ActionMenuItem, Facility, LoadedData } from '$lib/types';
+	import { Funnel, Plus } from '@lucide/svelte';
+	import { onMount } from 'svelte';
+	import { nav } from '../header.svelte';
+	import AddFacility from './add-facility.svelte';
 
-	let venues = $state<LoadedData<Venue[]>>({
+	let facilities = $state<LoadedData<Facility[]>>({
 		state: 'pending',
-		message: 'Loading venues...'
+		message: 'Loading facilities...'
 	});
 
-	let venueTypesMap = new Map<number, string>();
+	let facilityTypesMap = new Map<number, string>();
 
-	let addVenueSheetOpen = $state(false);
-	let facilitiesSheetOpen = $state(false);
-	let activeVenueId: null | number = $state(null);
+	let addFacilitySheetOpen = $state(false);
 
 	let searchValue = $state('');
 	let typeFilterId = $state<number | null>(null);
 
-	async function refreshVenues() {
+	async function refreshFacilities() {
 		try {
-			venues = {
+			facilities = {
 				state: 'pending',
-				message: 'Refreshing venues...'
+				message: 'Refreshing facilities...'
 			};
-			venues = {
+			facilities = {
 				state: 'success',
-				data: await loadVenues()
+				data: await loadFacilities()
 			};
 		} catch (error) {
-			venues = {
+			facilities = {
 				state: 'failed',
-				message: 'Failed to load venues'
+				message: 'Failed to load facilities'
 			};
 		}
 	}
 
 	onMount(async () => {
-		nav.set([{ title: 'Venues', url: '/venues' }]);
+		nav.set([{ title: 'Facilities', url: '/facilities' }]);
 
 		try {
-			const types = await loadVenueTypes();
+			const types = await loadFacilityTypes();
 			for (const type of types) {
-				venueTypesMap.set(type.id, type.name);
+				facilityTypesMap.set(type.id, type.name);
 			}
 		} catch (e) {
-			console.error('Failed to load venue types', e);
+			console.error('Failed to load facility types', e);
 		}
 
-		await refreshVenues();
+		await refreshFacilities();
 	});
 
-	let canModifyFacilities = $derived(permissionGrantedSomewhere('venue:modify_facilities'));
-
-	let actions = $derived.by<ActionMenuItem<Venue>[]>(() => [
+	let actions = $derived.by<ActionMenuItem<Facility>[]>(() => [
 		{
 			id: 1,
-			name: 'View Details',
-			onclick: (venue) => {
-				goto(`/venues/${venue.id}`);
+			name: 'View details',
+			onclick: (facility) => {
+				goto(`/facilities/${facility.id}`);
 			}
-		},
-		...(canModifyFacilities
-			? [
-					{
-						id: 2,
-						name: 'Manage Facilities',
-						onclick: (venue: Venue) => {
-							activeVenueId = venue.id;
-							facilitiesSheetOpen = true;
-						}
-					}
-				]
-			: [])
+		}
 	]);
 
-	let canCreateVenue = $derived(permissionGrantedSomewhere('venue:create'));
+	let canCreateFacility = $derived(permissionGrantedSomewhere('facility:create'));
 
-	let myVenues = $derived.by<{ id: number; name: string; typeName: string }[]>(() => {
+	let myFacilities = $derived.by<{ id: number; name: string; typeName: string }[]>(() => {
 		const user = authInfo.get();
 		if (!user || user.type === 'admin') return [];
-		const venueMemberships = user.memberships.filter((m: any) => m.type === 'venue');
-		return venueMemberships.map((m: any) => ({
-			id: m.id,
-			name: m.name,
-			typeName: m.kind.name
-		}));
+		return user.memberships
+			.filter((m) => m.type === 'facility')
+			.map((m) => ({
+				id: m.id,
+				name: m.name,
+				typeName: m.kind.name
+			}));
 	});
 
-	let filteredVenues = $derived.by(() => {
-		if (venues.state !== 'success') return [];
-		const myVenueIds = new Set(myVenues.map((v) => v.id));
-		return venues.data.filter((venue) => {
-			if (myVenueIds.has(venue.id)) return false;
-			const matchesSearch = venue.name.toLowerCase().includes(searchValue.toLowerCase());
-			const matchesFilter = typeFilterId ? venue.venueTypeId === typeFilterId : true;
+	let filteredFacilities = $derived.by(() => {
+		if (facilities.state !== 'success') return [];
+		const myFacilityIds = new Set(myFacilities.map((v) => v.id));
+		return facilities.data.filter((facility) => {
+			if (myFacilityIds.has(facility.id)) return false;
+			const matchesSearch = facility.name.toLowerCase().includes(searchValue.toLowerCase());
+			const matchesFilter = typeFilterId ? facility.type.id === typeFilterId : true;
 			return matchesSearch && matchesFilter;
 		});
 	});
@@ -129,11 +113,11 @@
 				<DropdownMenu.Content align="start" class="w-48">
 					<DropdownMenu.Item onclick={() => (typeFilterId = null)}>
 						<div class="flex flex-col gap-0.5">
-							<span class="text-sm font-medium">All Venues</span>
+							<span class="text-sm font-medium">All facilities</span>
 						</div>
 					</DropdownMenu.Item>
 					<DropdownMenu.Separator />
-					{#each Array.from(venueTypesMap.entries()) as [id, name]}
+					{#each Array.from(facilityTypesMap.entries()) as [id, name]}
 						<DropdownMenu.Item onclick={() => (typeFilterId = id)}>
 							<div class="flex w-full items-center justify-between gap-2">
 								<span class="text-sm font-medium">{name}</span>
@@ -146,15 +130,15 @@
 				</DropdownMenu.Content>
 			</DropdownMenu.Root>
 
-			<SearchInput bind:value={searchValue} placeholder="Search venues..." />
+			<SearchInput bind:value={searchValue} placeholder="Search facilities..." />
 
 			<!-- Add button -->
-			{#if canCreateVenue}
+			{#if canCreateFacility}
 				<Button
 					size="icon"
 					class="relative size-8 p-0 md:hidden"
 					onclick={() => {
-						addVenueSheetOpen = true;
+						addFacilitySheetOpen = true;
 					}}
 				>
 					<Plus />
@@ -162,10 +146,10 @@
 				<Button
 					class="hidden md:inline-flex"
 					onclick={() => {
-						addVenueSheetOpen = true;
+						addFacilitySheetOpen = true;
 					}}
 				>
-					<Plus /> Add Venue
+					<Plus /> Add facility
 				</Button>
 			{/if}
 		</div>
@@ -173,22 +157,22 @@
 
 	<!-- List -->
 	<div class="px-3">
-		{#if venues.state === 'pending'}
-			<p class="p-4 text-center">Loading venues...</p>
-		{:else if venues.state === 'success'}
+		{#if facilities.state === 'pending'}
+			<p class="p-4 text-center">Loading facilities...</p>
+		{:else if facilities.state === 'success'}
 			<div class="flex flex-col gap-y-4">
-				{#if myVenues.length > 0}
+				{#if myFacilities.length > 0}
 					<div>
-						<div class="mb-2 text-xs text-muted-foreground uppercase">My Venues</div>
+						<div class="mb-2 text-xs text-muted-foreground uppercase">My Facilities</div>
 						<div class="flex flex-col">
-							{#each myVenues as venue}
+							{#each myFacilities as facility}
 								<a
-									href="/venues/{venue.id}"
+									href="/facilities/{facility.id}"
 									class="flex items-center gap-3 border-x border-b p-3 transition-colors first:rounded-t-sm first:border-t last:rounded-b-sm hover:bg-accent"
 								>
 									<div class="flex flex-col">
-										<span class="font-medium">{venue.name}</span>
-										<span class="text-xs text-muted-foreground">{venue.typeName}</span>
+										<span class="font-medium">{facility.name}</span>
+										<span class="text-xs text-muted-foreground">{facility.typeName}</span>
 									</div>
 								</a>
 							{/each}
@@ -197,7 +181,7 @@
 				{/if}
 
 				<TreeTable
-					items={filteredVenues}
+					items={filteredFacilities}
 					treeMode={false}
 					columns={[
 						{
@@ -205,83 +189,94 @@
 							render: nameCol
 						},
 						{
-							header: 'Max Capacity',
-							render: capacityCol
-						},
-						{
 							header: 'Type',
 							render: typeCol
+						},
+						{
+							header: 'Association',
+							render: associationCol
+						},
+						{
+							header: 'Providers',
+							render: providersCol
 						}
 					]}
-					onRowClick={(venue: Venue) => {
-						goto(`/venues/${venue.id}`);
+					onRowClick={(facility: Facility) => {
+						goto(`/facilities/${facility.id}`);
 					}}
 					{actions}
-					itemLabel="venues"
+					itemLabel="facilities"
 				>
-					{#snippet mobileRow(venue: Venue, _depth: number)}
+					{#snippet mobileRow(facility: Facility, _depth: number)}
 						<div
 							class="flex cursor-pointer items-center gap-3 p-3 transition-colors hover:bg-accent/50"
-							onclick={() => goto(`/venues/${venue.id}`)}
+							onclick={() => goto(`/facilities/${facility.id}`)}
 							role="button"
 							tabindex={0}
 							onkeydown={(e) => {
-								if (e.key === 'Enter' || e.key === ' ') goto(`/venues/${venue.id}`);
+								if (e.key === 'Enter' || e.key === ' ') goto(`/facilities/${facility.id}`);
 							}}
 						>
 							<div class="flex min-w-0 flex-1 flex-col truncate">
-								<span class="mt-0.5 mb-1 truncate text-sm leading-tight font-medium"
-									>{venue.name}</span
-								>
-								<div class="mb-1.5 flex flex-wrap gap-1.5">
+								<div class="mb-1 flex items-center gap-1">
+									<span class="truncate text-sm leading-tight font-medium"
+										>{facility.name}</span
+									>
 									<Badge
 										variant="outline"
 										class="border-transparent bg-foreground/10 text-[10px] leading-none font-normal text-foreground hover:bg-foreground/15"
-										>{venueTypesMap.get(venue.venueTypeId) ?? '—'}</Badge
+										>{facilityTypesMap.get(facility.type.id) ?? '—'}</Badge
 									>
 								</div>
 								<span class="truncate text-[10px] leading-tight text-muted-foreground">
-									Capacity: {venue.maxCapacity}
+									Association: {facility.association[0].toUpperCase() +
+										facility.association.substring(1)}
 								</span>
+								{#if facility.providers.length > 0}
+									<span class="truncate text-[10px] leading-tight text-muted-foreground">
+										Providers: {facility.providers.map((p) => p.scope.name).join(', ')}
+									</span>
+								{/if}
 							</div>
 							<div
 								class="flex shrink-0 items-center justify-end gap-2"
 								onclick={(e) => e.stopPropagation()}
 								role="presentation"
 							>
-								<DataTableActions selectedItem={venue} {actions} />
+								<DataTableActions selectedItem={facility} {actions} />
 							</div>
 						</div>
 					{/snippet}
 				</TreeTable>
 			</div>
 		{:else}
-			<p class="p-4 text-center text-red-500">{venues.message}</p>
+			<p class="p-4 text-center text-red-500">{facilities.message}</p>
 		{/if}
 	</div>
 </div>
 
-{#if venues.state === 'success'}
-	<AddVenue bind:venues bind:open={addVenueSheetOpen} />
-	<VenueFacilitiesSheet
-		activeVenueId={activeVenueId!}
-		activeVenueName={venues.data.find((v) => v.id === activeVenueId)?.name!}
-		bind:sheetOpen={facilitiesSheetOpen}
-	/>
+{#if facilities.state === 'success'}
+	<AddFacility bind:facilities bind:open={addFacilitySheetOpen} />
 {/if}
 
-{#snippet nameCol(venue: Venue, _depth: number)}
+{#snippet nameCol(facility: Facility, _depth: number)}
 	<div class="flex items-center gap-2">
-		<span class="font-medium hover:underline">{venue.name}</span>
+		<span class="font-medium hover:underline">{facility.name}</span>
 	</div>
 {/snippet}
 
-{#snippet capacityCol(venue: Venue, _depth: number)}
-	<span class="text-sm">{venue.maxCapacity}</span>
+{#snippet typeCol(facility: Facility, _depth: number)}
+	<Badge variant="outline" class="border-transparent bg-foreground/5 text-muted-foreground">
+		{facilityTypesMap.get(facility.type.id) ?? '—'}
+	</Badge>
 {/snippet}
 
-{#snippet typeCol(venue: Venue, _depth: number)}
-	<Badge variant="outline" class="border-transparent bg-foreground/5 text-muted-foreground">
-		{venueTypesMap.get(venue.venueTypeId) ?? '—'}
-	</Badge>
+{#snippet associationCol(facility: Facility, _depth: number)}
+	<span class="text-sm"
+		>{facility.association[0].toUpperCase() + facility.association.substring(1)}</span
+	>
+{/snippet}
+
+{#snippet providersCol(facility: Facility, _depth: number)}
+	<span class="text-sm">{facility.providers.map((p) => p.scope.name).join(', ')}</span>
 {/snippet}
