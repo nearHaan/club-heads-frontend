@@ -6,7 +6,6 @@
 	import { onMount } from 'svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import AddVenue from './add-venue.svelte';
-	import VenueFacilitiesSheet from './venue-facilities-sheet.svelte';
 	import { goto } from '$app/navigation';
 	import Badge from '$lib/components/ui/badge/badge.svelte';
 	import SearchInput from '$lib/components/app/search-input.svelte';
@@ -263,11 +262,6 @@
 
 {#if venues.state === 'success'}
 	<AddVenue bind:venues bind:open={addVenueSheetOpen} />
-	<VenueFacilitiesSheet
-		activeVenueId={activeVenueId!}
-		activeVenueName={venues.data.find((v) => v.id === activeVenueId)?.name!}
-		bind:sheetOpen={facilitiesSheetOpen}
-	/>
 {/if}
 
 {#snippet nameCol(venue: Venue, _depth: number)}

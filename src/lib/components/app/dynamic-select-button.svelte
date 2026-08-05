@@ -1,20 +1,20 @@
-<script lang="ts" generics="T extends {id: number, name?: string}[]">
+<script lang="ts" generics="T extends {id: number, name?: string}">
 	import type { LoadedData } from '$lib/types';
 	import { cn } from 'tailwind-variants';
 	let {
 		name,
 		class: className,
-		value = $bindable(),
+		value = $bindable(null),
 		loadFn,
 		...restProps
 	}: {
 		name: string;
 		class?: string;
-		value: string | number | null;
-		loadFn: () => Promise<T>;
+		value: T | null;
+		loadFn: () => Promise<T[]>;
 	} = $props();
 
-	let itemsList = $state<LoadedData<T>>({
+	let itemsList = $state<LoadedData<T[]>>({
 		state: 'pending',
 		message: 'Loading...'
 	});
@@ -41,7 +41,7 @@
 			<option disabled={true}>Empty</option>
 		{/if}
 		{#each itemsList.data as item}
-			<option value={item.id}>{item.name}</option>
+			<option value={item}>{item.name}</option>
 		{/each}
 	{:else}
 		<option disabled={true}>Loading...</option>

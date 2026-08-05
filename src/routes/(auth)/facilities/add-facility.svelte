@@ -34,7 +34,6 @@
 	let errorText = $state('');
 
 	let type: FacilityType | null = $state(null);
-	let organizationId: number | null = $state(null);
 	let association: FacilityAssociationMethod = $state('event');
 	let overlapPolicy: FacilityOverlapPolicy = $state('exclusive');
 	let workflowParticipationPolicy: FacilityWorkflowParticipationPolicy = $state('include');
@@ -72,14 +71,7 @@
 			const name = formData.get('name')?.toString().trim();
 			// const unavailabilityReason = formData.get('unavailabilityReason')?.toString().trim();
 
-			if (
-				!name ||
-				name.length === 0 ||
-				type == null ||
-				type.id == null ||
-				!maxCapacity ||
-				!organizationId
-			) {
+			if (!name || name.length === 0 || type == null) {
 				errorText = 'Name, Venue Type, Capacity and organization are required fields';
 				return;
 			}
@@ -131,6 +123,7 @@
 
 		<div class="grid gap-y-xxs">
 			<Label for="facilityTypeId">Facility Type</Label>
+			<DynamicSelectButton name="facilityType" bind:value={type} loadFn={loadFacilityTypes}/>
 		</div>
 
 		<div class="grid gap-y-xxs">
@@ -139,6 +132,30 @@
 				name="association"
 				bind:value={association}
 				itemsList={associationMethods}
+				class="w-full"
+				optionName="label"
+				optionValue="value"
+			/>
+		</div>
+
+		<div class="grid gap-y-xxs">
+			<Label for="association">Overlap Policy</Label>
+			<SelectButton
+				name="overlapPolicy"
+				bind:value={overlapPolicy}
+				itemsList={overlapPolicies}
+				class="w-full"
+				optionName="label"
+				optionValue="value"
+			/>
+		</div>
+
+		<div class="grid gap-y-xxs">
+			<Label for="association">Workflow Participation Policy</Label>
+			<SelectButton
+				name="workflowParticipationPolicy"
+				bind:value={workflowParticipationPolicy}
+				itemsList={workflowParticipationPolicies}
 				class="w-full"
 				optionName="label"
 				optionValue="value"

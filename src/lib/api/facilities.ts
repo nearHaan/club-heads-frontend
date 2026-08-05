@@ -117,3 +117,33 @@ export async function deleteFacilityMember(id: number, userId: number) {
 		throw new Error(res.message);
 	}
 }
+
+export async function addProviderToFacility(
+	id: number,
+	providerData: { providerType: 'organization' | 'venue'; providerId: number }
+) {
+	const res = await api
+		.post(`facilities/${id}/providers`, {
+			json: providerData
+		})
+		.json<ApiResponse<{ id: number }>>();
+	if (res.success) {
+		return res.data;
+	} else {
+		throw new Error(res.message);
+	}
+}
+
+export async function deleteProviderOfFacility(
+  id: number,
+	providerId: number
+) {
+	const res = await api
+		.delete(`facilities/${id}/providers/${providerId}`)
+		.json<ApiResponse<boolean>>();
+	if (res.success) {
+		return res.data;
+	} else {
+		throw new Error(res.message);
+	}
+}

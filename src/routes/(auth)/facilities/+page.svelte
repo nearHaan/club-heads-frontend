@@ -189,12 +189,16 @@
 							render: nameCol
 						},
 						{
-							header: 'Max Capacity',
-							render: capacityCol
-						},
-						{
 							header: 'Type',
 							render: typeCol
+						},
+						{
+							header: 'Association',
+							render: associationCol
+						},
+						{
+							header: 'Providers',
+							render: providersCol
 						}
 					]}
 					onRowClick={(facility: Facility) => {
@@ -214,10 +218,10 @@
 							}}
 						>
 							<div class="flex min-w-0 flex-1 flex-col truncate">
-								<span class="mt-0.5 mb-1 truncate text-sm leading-tight font-medium"
-									>{facility.name}</span
-								>
-								<div class="mb-1.5 flex flex-wrap gap-1.5">
+								<div class="mb-1 flex items-center gap-1">
+									<span class="truncate text-sm leading-tight font-medium"
+										>{facility.name}</span
+									>
 									<Badge
 										variant="outline"
 										class="border-transparent bg-foreground/10 text-[10px] leading-none font-normal text-foreground hover:bg-foreground/15"
@@ -225,8 +229,14 @@
 									>
 								</div>
 								<span class="truncate text-[10px] leading-tight text-muted-foreground">
-									Capacity: {facility.maxCapacity}
+									Association: {facility.association[0].toUpperCase() +
+										facility.association.substring(1)}
 								</span>
+								{#if facility.providers.length > 0}
+									<span class="truncate text-[10px] leading-tight text-muted-foreground">
+										Providers: {facility.providers.map((p) => p.scope.name).join(', ')}
+									</span>
+								{/if}
 							</div>
 							<div
 								class="flex shrink-0 items-center justify-end gap-2"
@@ -255,12 +265,18 @@
 	</div>
 {/snippet}
 
-{#snippet capacityCol(facility: Facility, _depth: number)}
-	<span class="text-sm">{facility.maxCapacity}</span>
-{/snippet}
-
 {#snippet typeCol(facility: Facility, _depth: number)}
 	<Badge variant="outline" class="border-transparent bg-foreground/5 text-muted-foreground">
 		{facilityTypesMap.get(facility.type.id) ?? '—'}
 	</Badge>
+{/snippet}
+
+{#snippet associationCol(facility: Facility, _depth: number)}
+	<span class="text-sm"
+		>{facility.association[0].toUpperCase() + facility.association.substring(1)}</span
+	>
+{/snippet}
+
+{#snippet providersCol(facility: Facility, _depth: number)}
+	<span class="text-sm">{facility.providers.map((p) => p.scope.name).join(', ')}</span>
 {/snippet}

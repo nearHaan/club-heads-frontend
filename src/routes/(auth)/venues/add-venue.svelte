@@ -10,7 +10,7 @@
 	import Checkbox from '$lib/components/ui/checkbox/checkbox.svelte';
 	import Textarea from '$lib/components/ui/textarea/textarea.svelte';
 	import * as Sheet from '$lib/components/ui/sheet/index.js';
-	import type { LoadedData, Venue } from '$lib/types';
+	import type { LoadedData, Organization, Venue, VenueType } from '$lib/types';
 	import SideSheet from '$lib/components/app/side-sheet.svelte';
 	import { Loader } from '@lucide/svelte';
 
@@ -22,8 +22,8 @@
 
 	let errorText = $state('');
 
-	let venueTypeId: number | null = $state(null);
-	let organizationId: number | null = $state(null);
+	let venueType: VenueType | null = $state(null);
+	let organization: Organization | null = $state(null);
 	let accessLevel: 'public' | 'private' = $state('public');
 	let isAvailable = $state(true);
 
@@ -43,7 +43,7 @@
 			const maxCapacity = Number(formData.get('maxCapacity') as string);
 			const unavailabilityReason = formData.get('unavailabilityReason')?.toString().trim();
 
-			if (!name || name.length === 0 || !venueTypeId || !maxCapacity || !organizationId) {
+			if (!name || name.length === 0 || !venueType || !maxCapacity || !organization) {
 				errorText = 'Name, Venue Type, Capacity and organization are required fields';
 				return;
 			}
@@ -51,8 +51,8 @@
 			addLoading = true;
 			const { id } = await createVenue({
 				name,
-				venueTypeId: venueTypeId,
-				organizationId: organizationId,
+				venueTypeId: venueType.id,
+				organizationId: organization?.id,
 				maxCapacity,
 				accessLevel,
 				isAvailable,
@@ -69,17 +69,17 @@
 						isAvailable,
 						isActive: false,
 						maxCapacity,
-						organizationId,
+						organizationId: organization?.id!,
 						unavailabilityReason: unavailabilityReason ? unavailabilityReason : '',
-						venueTypeId
+						venueTypeId: venueType.id
 					}
 				]
 			};
 			form.reset();
 			accessLevel = 'public';
 			isAvailable = true;
-			venueTypeId = null;
-			organizationId = null;
+			venueType = null;
+			organization = null;
 			open = false;
 		} catch (err: any) {
 			errorText = err.message;
@@ -106,7 +106,7 @@
 			<DynamicSelectButton
 				name="venue type"
 				class="w-full"
-				bind:value={venueTypeId}
+				bind:value={venueType}
 				loadFn={loadVenueTypes}
 			/>
 		</div>
@@ -116,7 +116,7 @@
 			<DynamicSelectButton
 				name="organizationId"
 				class="w-full"
-				bind:value={organizationId}
+				bind:value={organization}
 				loadFn={loadOrgs}
 			/>
 		</div>
