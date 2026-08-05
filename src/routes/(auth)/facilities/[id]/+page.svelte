@@ -35,7 +35,7 @@
 			return 'Loading';
 		} else if (roles.state === 'success') {
 			const rolesData = roles.data;
-			return member.roles.reduce((acc: string, role, i) => {
+			return member.roles.reduce((acc: string, role) => {
 				const name = rolesData.find((_role) => _role.id === role.roleId)?.name ?? '';
 				return acc ? acc + ', ' + name : acc + name;
 			}, '');
