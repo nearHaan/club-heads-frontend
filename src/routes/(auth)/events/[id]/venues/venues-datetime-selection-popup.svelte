@@ -2,16 +2,18 @@
 	import { allotEventVenue } from '$lib/api/events/venue-allotments';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
-	import { type EventVenueAllotment, type Venue } from '$lib/types';
+	import { type EventDetail, type EventVenueAllotment, type Venue } from '$lib/types';
 	import { Calendar, Clock, Loader } from '@lucide/svelte';
 
 	let {
 		eventId,
+		event,
 		isOpen = $bindable(false),
 		selectedVenue = $bindable(),
 		allotedVenues = $bindable()
 	}: {
 		eventId: number;
+		event: EventDetail;
 		isOpen: boolean;
 		selectedVenue: null | Venue;
 		allotedVenues: EventVenueAllotment[];
@@ -19,6 +21,24 @@
 
 	let addVenueLoading = $state(false);
 	let errorText = $state('');
+
+	// function extractCalendarDateTime(dateStr: string): CalendarDateTime {
+	// 	const date = new Date(dateStr);
+	// 	return new CalendarDateTime(
+	// 		date.getFullYear(),
+	// 		date.getMonth() + 1,
+	// 		date.getDate(),
+	// 		date.getHours(),
+	// 		date.getMinutes(),
+	// 		date.getSeconds(),
+	// 		date.getMilliseconds()
+	// 	);
+	// }
+
+	// let startDate: CalendarDate = $derived(toCalendarDate(extractCalendarDateTime(event.startsAt)));
+	// let startTime: Time = $derived(toTime(extractCalendarDateTime(event.startsAt)));
+	// let endDate: CalendarDate = $derived(toCalendarDate(extractCalendarDateTime(event.endsAt)));
+	// let endTime: Time = $derived(toTime(extractCalendarDateTime(event.endsAt)));
 
 	let newStartDate: string | undefined = $state(undefined);
 	let newStartTime: string = $state('00:00:00');
@@ -95,6 +115,7 @@
 									class="focus:outline-none"
 									type="date"
 								/>
+								<!-- <DatePicker bind:value={startDate} /> -->
 							</div>
 							<div class="flex w-full items-center gap-xxs p-xxs text-sm text-foreground">
 								<Clock class="text-muted-foreground" size="20" />

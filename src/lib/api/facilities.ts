@@ -134,13 +134,60 @@ export async function addProviderToFacility(
 	}
 }
 
-export async function deleteProviderOfFacility(
-  id: number,
-	providerId: number
-) {
+export async function deleteProviderOfFacility(id: number, providerId: number) {
 	const res = await api
 		.delete(`facilities/${id}/providers/${providerId}`)
 		.json<ApiResponse<boolean>>();
+	if (res.success) {
+		return res.data;
+	} else {
+		throw new Error(res.message);
+	}
+}
+
+export async function changeFacilityAvailability(facilityId: number, availability: boolean) {
+	const res = await api
+		.patch(`facilities/${facilityId}`, {
+			json: { availability }
+		})
+		.json<ApiResponse<true>>();
+
+	if (res.success) {
+		return res.data;
+	} else {
+		throw new Error(res.message);
+	}
+}
+
+export async function getEventAssociatedFacilities() {
+	const res = await api.get(`facilities/event-associated`).json<
+		ApiResponse<
+			{
+				id: number;
+				name: string;
+				type: {
+					id: number;
+					name: string;
+				};
+				association: 'event' | 'venue_allotment';
+				overlapPolicy: 'shared' | 'exclusive';
+				workflowParticipationPolicy: 'include' | 'exclude';
+				isAvailable: boolean;
+				providers: {
+					id: number;
+					scope: {
+						type: 'organization' | 'venue';
+						id: number;
+						name: string;
+						kind: {
+							id: number;
+							name: string;
+						};
+					};
+				}[];
+			}[]
+		>
+	>();
 	if (res.success) {
 		return res.data;
 	} else {

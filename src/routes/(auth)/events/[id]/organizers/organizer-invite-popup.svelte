@@ -30,7 +30,14 @@
 		eventId: number;
 		eventName: string;
 		organizations: LoadedData<Organization[]>;
-		organizers: EventOrganizer[];
+		organizers: {
+			id: number;
+			organization: {
+				id: number;
+				name: string;
+			};
+			role: EventOrganizerRole;
+		}[];
 		organizerInvitations: LoadedData<EventOrganizerInvitation[]>;
 		organizationId: number;
 		organizationName: string;

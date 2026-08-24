@@ -71,3 +71,34 @@ export async function createVenueAllotment(eventId: number, data: CreateVenueAll
 		throw new Error(res.message);
 	}
 }
+
+export async function assignFacilityToEvent(
+	eventId: number,
+	facilityId: number,
+	venueAllotmentId?: number
+) {
+	const res = await api
+		.post(`events/${eventId}/facility-assignments`, {
+			json: {
+				facilityId: facilityId,
+				venueAllotmentId: venueAllotmentId
+			}
+		})
+		.json<ApiResponse<{ id: number }>>();
+	if (res.success) {
+		return res.data;
+	} else {
+		throw new Error(res.message);
+	}
+}
+
+export async function unassignFacilityFromEvent(eventId: number, facilityAssignmentId: number) {
+	const res = await api
+		.delete(`events/${eventId}/facility-assignments/${facilityAssignmentId}`)
+		.json<ApiResponse<{ id: number }>>();
+	if (res.success) {
+		return res.data;
+	} else {
+		throw new Error(res.message);
+	}
+}

@@ -22,7 +22,14 @@
 		eventId,
 		eventName
 	}: {
-		organizers: EventOrganizer[];
+		organizers: {
+			id: number;
+			organization: {
+				id: number;
+				name: string;
+			};
+			role: EventOrganizerRole;
+		}[];
 		organizerInvitations: LoadedData<EventOrganizerInvitation[]>;
 		organizations: LoadedData<Organization[]>;
 		eventId: number;

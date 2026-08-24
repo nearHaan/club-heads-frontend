@@ -10,12 +10,14 @@
 	import SearchInput from '$lib/components/app/search-input.svelte';
 	import ShapeAvatarSvg from '$lib/components/app/shape-avatar-svg.svelte';
 	import {
+		changeFacilityAvailability,
 		deleteProviderOfFacility,
 		getFacilityById,
 		loadFacilityMembers
 	} from '$lib/api/facilities';
 	import { loadRolesFacilityType } from '$lib/api/facility-types';
 	import AddProvider from './add-provider.svelte';
+	import { toast } from 'svelte-sonner';
 
 	let addSheetOpen = $state(false);
 	let addProviderSheetOpen = $state(false);
@@ -135,6 +137,8 @@
 	}
 
 	let canAddMember = $derived(permissionGrantedSomewhere('facility:create'));
+
+	let isMarkingavailablility = $state(false);
 </script>
 
 <div class="mx-auto w-full max-w-prose pb-16">
@@ -260,6 +264,29 @@
 			</div>
 		</div>
 	</div>
+
+	{#if facility.state === 'success'}
+		<div class="px-3">
+			<div>
+				<div>Facility availability</div>
+				<Button
+					disabled={isMarkingavailablility}
+					onclick={async () => {
+						if (facility.state !== 'success') return;
+						isMarkingavailablility = true;
+						try {
+							await changeFacilityAvailability(facility.data.id, !facility.data.isAvailable);
+							facility.data.isAvailable = !facility.data.isAvailable;
+						} catch {
+							toast.error('Something went wrong');
+						} finally {
+							isMarkingavailablility = false;
+						}
+					}}>Mark as {facility.data.isAvailable ? 'Unavailable' : 'Available'}</Button
+				>
+			</div>
+		</div>
+	{/if}
 </div>
 
 {#if facilityMembers.state === 'success' && roles.state === 'success'}

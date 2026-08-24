@@ -6,7 +6,8 @@ import type {
 	CreateVenueData,
 	Role,
 	EntityMember,
-	VenueFacility
+	VenueFacility,
+	VenueDetail
 } from '$lib/types';
 
 export async function getVenueById(id: number) {
@@ -14,6 +15,19 @@ export async function getVenueById(id: number) {
 		throw new Error('Venue ID required');
 	}
 	const res = await api.get(`venues/${id}`).json<ApiResponse<Venue>>();
+	if (res.success) {
+		return res.data;
+	} else {
+		throw new Error(res.message);
+	}
+}
+
+// todo: clean this up
+export async function getVenueByIdInDetail(id: number) {
+	if (!id) {
+		throw new Error('Venue ID required');
+	}
+	const res = await api.get(`venues/${id}`).json<ApiResponse<VenueDetail>>();
 	if (res.success) {
 		return res.data;
 	} else {

@@ -27,7 +27,14 @@
 		isConfirmPopupOpen: boolean;
 		eventId: number;
 		eventName: string;
-		organizers: EventOrganizer[];
+		organizers: {
+			id: number;
+			organization: {
+				id: number;
+				name: string;
+			};
+			role: EventOrganizerRole;
+		}[];
 		organizerInvitations: LoadedData<EventOrganizerInvitation[]>;
 		role: EventOrganizerRole;
 		selectedOrgId: null | number;

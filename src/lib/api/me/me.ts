@@ -1,5 +1,5 @@
 import { api } from '$lib/api';
-import type { ApiResponse, CalculatedCalendarEvent } from '$lib/types';
+import type { ApiResponse, CalendarEventsAndDate } from '$lib/types';
 
 export async function loadEventCreatableOrganizations() {
 	const res = await api
@@ -22,7 +22,7 @@ export async function loadCalculatedCalendarEvents(params: {
 		.get(
 			`me/calendar?next=${params.next}&status=${params.status}&start=${params.start}${params.venueId ? `&venueId=${params.venueId}` : ''}`
 		)
-		.json<ApiResponse<CalculatedCalendarEvent[]>>();
+		.json<ApiResponse<CalendarEventsAndDate[]>>();
 	if (res.success) {
 		return res.data;
 	} else {

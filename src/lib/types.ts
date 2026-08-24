@@ -173,6 +173,36 @@ export type Venue = {
 	isActive: boolean;
 };
 
+export type VenueAccessLevel = 'public' | 'private';
+
+export type VenueDetail = {
+	id: number;
+	name: string;
+	type: {
+		id: number;
+		name: string;
+	};
+	maxCapacity: number;
+	accessLevel: VenueAccessLevel;
+	isAvailable: boolean;
+	unavailabilityReason: string | null;
+	isActive: boolean;
+	createdAt: string;
+	organization: {
+		id: number;
+		name: string;
+	} | null;
+	facilities: {
+		id: number;
+		name: string;
+		type: {
+			id: number;
+			name: string;
+		};
+		isAvailable: boolean;
+	}[];
+};
+
 export type FacilityAssociationMethod = 'event' | 'venue_allotment';
 export type FacilityOverlapPolicy = 'shared' | 'exclusive';
 export type FacilityWorkflowParticipationPolicy = 'include' | 'exclude';
@@ -464,17 +494,54 @@ export type EventDetail = {
 	expectedParticipants: number;
 	requestDetails: string;
 	status: EventStatus;
-	parentEventId: number | null;
+	createdAt: string;
 	startsAt: string;
 	endsAt: string;
-	createdAt: string;
-	updatedAt: string;
-	type: { id: number; name: string };
+	type: {
+		id: number;
+		name: string;
+		collaborationPolicy: EventTypeCollaborationPolicy;
+		venuePolicy: EventTypeVenuePolicy;
+	};
 	category: { id: number; name: string };
 	parentEvent: { id: number; title: string } | null;
-	organizers: EventOrganizer[];
-	venueAllotments: EventVenueAllotment[];
-	report: { id: number; details: string; submittedAt: string } | null;
+	organizers: {
+		id: number;
+		organization: { id: number; name: string };
+		role: EventOrganizerRole;
+	}[];
+	venueAllotments: {
+		id: number;
+		startsAt: string;
+		endsAt: string;
+		venue: { id: number; name: string };
+		facilities: {
+			id: number;
+			venueAllotmentId: number | null;
+			facility: {
+				id: number;
+				name: string;
+				type: {
+					id: number;
+					name: string;
+				};
+				isAvailable: boolean;
+			};
+		}[];
+	}[];
+	facilities: {
+		id: number;
+		venueAllotmentId: number | null;
+		facility: {
+			id: number;
+			name: string;
+			type: {
+				id: number;
+				name: string;
+			};
+			isAvailable: boolean;
+		};
+	}[];
 };
 
 export type CreateEventData = {

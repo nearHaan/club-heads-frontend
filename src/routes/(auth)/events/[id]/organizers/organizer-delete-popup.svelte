@@ -33,7 +33,14 @@
 		eventName: string;
 		type: 'organizer' | 'invitation';
 		organizations: LoadedData<Organization[]>;
-		organizers: EventOrganizer[];
+		organizers: {
+			id: number;
+			organization: {
+				id: number;
+				name: string;
+			};
+			role: EventOrganizerRole;
+		}[];
 		organizerInvitations: LoadedData<EventOrganizerInvitation[]>;
 		organizationName: string;
 	} = $props();

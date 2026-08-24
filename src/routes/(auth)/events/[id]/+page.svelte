@@ -18,12 +18,14 @@
 	import WorkflowsSection from './workflows/workflows-section.svelte';
 	import { loadEventWorkflowsLatest } from '$lib/api/events/workflow-instances';
 	import { cancelEvent, submitEvent } from '$lib/api/events/events';
-	import { CheckCircle, Edit, Loader, XCircle } from '@lucide/svelte';
+	import { CheckCircle, Edit, Loader, Plus, X, XCircle } from '@lucide/svelte';
 	import { eventStatusColors, eventStatusTextColors } from '$lib/constants';
 	import Button, { buttonVariants } from '$lib/components/ui/button/button.svelte';
 	import { nav } from '../../header.svelte';
 	import EditEventSheet from './edit-event-sheet.svelte';
 	import * as Tooltip from '$lib/components/ui/tooltip/index';
+	import FacilityAssignmentPopup from './facilities/facility-assignment-popup.svelte';
+	import FacilityAssignmentDeletionPopup from './facilities/facility-assignment-deletion-popup.svelte';
 
 	let event = $state<LoadedData<EventDetail>>({
 		state: 'pending',
@@ -248,7 +250,39 @@
 					bind:organizers={event.data.organizers}
 					{organizations}
 				/>
-				<VenuesSection eventId={event.data.id} bind:allotedVenues={event.data.venueAllotments} />
+				<VenuesSection
+					eventId={event.data.id}
+					event={event.data}
+					bind:allotedVenues={event.data.venueAllotments}
+				/>
+
+				<div class="space-y-2">
+					<div class="flex place-items-center justify-between">
+						<p class="text-lg font-medium">Facilities</p>
+
+						<FacilityAssignmentPopup bind:event={event.data} />
+					</div>
+
+					<div>
+						{#each event.data.facilities as facility, i}
+							<div
+								class="flex w-full place-items-center justify-between gap-4 rounded-sm border px-3 py-2"
+							>
+								<div>
+									<div class="font-medium">{facility.facility.name}</div>
+									<div class="text-sm text-muted-foreground">{facility.facility.type.name}</div>
+								</div>
+
+								<FacilityAssignmentDeletionPopup bind:event={event.data} facilityIndex={i} />
+							</div>
+						{:else}
+							<div class="flex place-items-center text-muted-foreground gap-4">
+								Nothing to show here!
+							</div>
+						{/each}
+					</div>
+				</div>
+
 				<WorkflowsSection eventId={event.data.id} activeWorkflow={latestWorkflow} bind:trigReload />
 
 				<div class="flex w-full gap-xs max-sm:flex-col-reverse">
